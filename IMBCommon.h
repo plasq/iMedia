@@ -162,6 +162,13 @@ enum
 typedef NSUInteger IMBResourceAccessibility;
 
 
+// File Extended Attributes
+
+/**
+ Denotes the app bundle identifier a media file originates from (e.g. com.apple.photos)
+ */
+extern NSString *IMBFileXattrSourceAppBundleIdentifier;
+
 //----------------------------------------------------------------------------------------------------------------------
 
 
@@ -187,6 +194,12 @@ typedef void (^IMBCompletionBlock)(id inResult,NSError* inError);
 
 
 #pragma mark MACROS
+
+#ifdef DEBUG
+#define DebugLog(...) NSLog(__VA_ARGS__)
+#else
+#define DebugLog(...)
+#endif
 
 #ifndef IMBRelease
 #define IMBRelease(object) if (object) {[object release]; object=nil;}

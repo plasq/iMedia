@@ -110,12 +110,9 @@
 {
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
-	NSMutableDictionary *defaultDefaults
-	= [NSMutableDictionary dictionaryWithObjectsAndKeys:
-	   
-	   //	   [NSNumber numberWithBool:YES], @"WebIconDatabaseEnabled",
-	   
-	   nil];
+	NSMutableDictionary *defaultDefaults = [NSMutableDictionary dictionary];
+	//NSMutableDictionary *defaultDefaults = [NSMutableDictionary dictionaryWithObject:[NSNumber numberWithBool:YES] forKey:@"WebIconDatabaseEnabled"];
+
 	NSUserDefaultsController* controller = [NSUserDefaultsController sharedUserDefaultsController];
 	NSUserDefaults* defaults = [controller defaults];
 	
@@ -369,10 +366,10 @@
 //         @"com.apple.medialibrary.Aperture.movie",             /* Aperture (Apple Media Library) */
 //         @"com.karelia.imedia.iTunes.audio",
 //         @"com.karelia.imedia.iTunes.movie",
-//         @"com.karelia.imedia.iPhoto.image",
-//         @"com.karelia.imedia.iPhoto.movie",
-//         @"com.karelia.imedia.Aperture.image",
-//         @"com.karelia.imedia.Aperture.movie",
+         @"com.karelia.imedia.iPhoto.image",
+         @"com.karelia.imedia.iPhoto.movie",
+         @"com.karelia.imedia.Aperture.image",
+         @"com.karelia.imedia.Aperture.movie",
          nil];
         if ([unqualifiedParserMessengerIdentifiers containsObject:inIdentifier]) {
             return NO;
@@ -457,6 +454,49 @@
 
 }
 
+/**
+ How to change the standard (alphabetical) order of nodes to some other order.
+ */
+- (void)libraryController:(IMBLibraryController *)inController willReplaceNode:(IMBNode *)inOldNode withNode:(IMBNode *)inNewNode
+{
+    // Helper to remove trailing part of identifier, e.g. "image", "audio, ... for some identifiers to keep map small
+    static NSString *(^baseDomainName)(NSString *) = ^NSString *(NSString *identifier)
+    {
+        NSRange divider = [identifier rangeOfString:@"." options:NSBackwardsSearch];
+        
+        if (divider.location != NSNotFound) return [identifier substringToIndex:divider.location];
+        else return identifier;
+    };
+    static NSDictionary *topLevelNodeDisplayPriorityMap;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        topLevelNodeDisplayPriorityMap = [@{
+                                           @"com.apple.medialibrary.Photos" :   @(10),
+                                           @"com.apple.medialibrary.iPhoto" :   @(20),
+                                           @"com.apple.medialibrary.Aperture" : @(30),
+                                           @"com.karelia.imedia.Lightroom7" :   @(35),
+                                           @"com.karelia.imedia.Lightroom6" :   @(40),
+                                           @"com.karelia.imedia.Lightroom5" :   @(50),
+                                           @"com.karelia.imedia.Lightroom4" :   @(60),
+                                           @"com.karelia.imedia.Lightroom3" :   @(70),
+                                           @"com.karelia.imedia.Lightroom2" :   @(80),
+                                           @"com.karelia.imedia.Lightroom1" :   @(90),
+                                           } retain];
+    });
+    if (![inNewNode isTopLevelNode]) return;
+    
+    NSString *parserMessengerIdentifier = [[inNewNode.parserMessenger class] identifier];
+    
+    NSNumber *nodeDisplayPriority = topLevelNodeDisplayPriorityMap[parserMessengerIdentifier];
+    if (!nodeDisplayPriority) {
+        nodeDisplayPriority = topLevelNodeDisplayPriorityMap[baseDomainName(parserMessengerIdentifier)];
+    }
+    if (nodeDisplayPriority) {
+        inNewNode.displayPriority = [nodeDisplayPriority integerValue];
+        return;
+    }
+    inNewNode.displayPriority = 500;
+}
 
 - (void) libraryController:(IMBLibraryController*)inController didCreateNode:(IMBNode*)inNode withParserMessenger:(IMBParserMessenger*)inParserMessenger
 {

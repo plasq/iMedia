@@ -351,7 +351,8 @@
 		{
 			if (error == nil)
 			{
-                dispatch_group_async(dispatchGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                dispatch_group_async(dispatchGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT,0),^()
+				{
                     NSError *nodeCreationError = nil;
                     IMBNode* node = [parser unpopulatedTopLevelNode:&nodeCreationError];
                     
@@ -435,6 +436,8 @@
 	{
 		[self _setParserIdentifierWithParser:parser onNodeTree:node];
 		[self _setObjectIdentifierWithParser:parser onNodeTree:node];
+		node.version = inNode.version;
+        node.error = error;
 	}
 	
 	if (outError) *outError = error;

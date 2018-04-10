@@ -171,6 +171,7 @@ static NSMutableDictionary* sRegisteredObjectViewControllerClasses = nil;
 {
     if (_currentNode != currentNode)
     {
+        // Save current scroll position for "back" navigation
         [_currentNode release];
         _currentNode = [currentNode retain];
         
@@ -322,7 +323,7 @@ static NSMutableDictionary* sRegisteredObjectViewControllerClasses = nil;
 
 
 #pragma mark 
-#pragma mark Lifetime
+#pragma mark Object Lifecycle
 
 
 - (id) initWithNibName:(NSString*)inNibName bundle:(NSBundle*)inBundle
@@ -375,6 +376,8 @@ static NSMutableDictionary* sRegisteredObjectViewControllerClasses = nil;
         }
     }
 	
+    if ([IMBConfig useGlobalViewType]) [IMBConfig removeObserver:self forKeyPath:kGlobalViewTypeKey];
+    
     IMBRelease(_observedVisibleItems);
 	
 	// Other cleanup...
@@ -383,7 +386,10 @@ static NSMutableDictionary* sRegisteredObjectViewControllerClasses = nil;
 	IMBRelease(_currentNode);
 	IMBRelease(_clickedObject);
 //	IMBRelease(_progressWindowController);
-	
+
+	IMBRelease(_objectCountFormatPlural);
+	IMBRelease(_objectCountFormatSingular);
+
 	[super dealloc];
 }
 
@@ -638,6 +644,19 @@ static NSMutableDictionary* sRegisteredObjectViewControllerClasses = nil;
 #pragma mark 
 #pragma mark User Interface
 
+/**
+ */
+- (NSView *)selectedObjectView
+{
+    if (_viewType == kIMBObjectViewTypeIcon)
+        return ibIconView;
+    else if (_viewType == kIMBObjectViewTypeList)
+        return ibListView;
+    else if (_viewType == kIMBObjectViewTypeCombo)
+        return ibComboView;
+    
+    return nil;
+}
 
 - (void) observeValueForKeyPath:(NSString*)inKeyPath ofObject:(id)inObject change:(NSDictionary*)inChange context:(void*)inContext
 {
@@ -1092,6 +1111,7 @@ static NSMutableDictionary* sRegisteredObjectViewControllerClasses = nil;
 		
 		if ([object isKindOfClass:[IMBNodeObject class]])
 		{
+            [IMBNodeViewController revealNodeWithIdentifier:((IMBNodeObject *)object).representedNodeIdentifier];
 			[self expandNodeObject:(IMBNodeObject*)object];
 		}
 		else if ([object isKindOfClass:[IMBButtonObject class]])
@@ -1583,7 +1603,8 @@ static NSMutableDictionary* sRegisteredObjectViewControllerClasses = nil;
 			
 		else
 		{
-			NSURL *location = [inObject location];
+            [inObject requestBookmarkWithError:nil];
+			NSURL *location = [inObject URLByResolvingBookmark];
 			if ([location isFileURL])
 			{			
 				if ([location checkResourceIsReachableAndReturnError:NULL])
@@ -1703,7 +1724,7 @@ static NSMutableDictionary* sRegisteredObjectViewControllerClasses = nil;
 					@"Menu item in context menu of IMBObjectViewController");
 				
 				item = [[NSMenuItem alloc] initWithTitle:title action:@selector(openInBrowser:) keyEquivalent:@""];
-				[item setRepresentedObject:location];
+				[item setRepresentedObject:inObject];
 				[item setTarget:self];
 				[menu addItem:item];
 				[item release];
@@ -1896,8 +1917,20 @@ static NSMutableDictionary* sRegisteredObjectViewControllerClasses = nil;
 
 - (IBAction) openInBrowser:(id)inSender
 {
-	NSURL* url = (NSURL*)[inSender representedObject];
-	[[NSWorkspace imb_threadSafeWorkspace] openURL:url];
+    IMBObject* object = (IMBObject*)[inSender representedObject];
+    
+    [object requestBookmarkWithCompletionBlock:^(NSError* inError)
+     {
+         if (inError)
+         {
+             [NSApp presentError:inError];
+         }
+         else
+         {
+             NSURL* url = [object URLByResolvingBookmark];
+             if (url) [[NSWorkspace imb_threadSafeWorkspace] openURL:url];
+         }
+     }];
 }
 
 
@@ -2181,15 +2214,8 @@ static NSMutableDictionary* sRegisteredObjectViewControllerClasses = nil;
 
 - (BOOL) previewPanel:(QLPreviewPanel*)inPanel handleEvent:(NSEvent *)inEvent
 {
-	NSView* view = nil;
+	NSView* view = [self selectedObjectView];
 	
-	if (_viewType == kIMBObjectViewTypeIcon)
-		view = ibIconView;
-	else if (_viewType == kIMBObjectViewTypeList)
-		view = ibListView;
-	else if (_viewType == kIMBObjectViewTypeCombo)
-		view = ibComboView;
-
 	if ([inEvent type] == NSKeyDown)
 	{
 		[view keyDown:inEvent];

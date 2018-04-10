@@ -64,6 +64,7 @@
 #import "NSObject+iMedia.h"
 #import "NSFileManager+iMedia.h"
 #import "NSImage+iMedia.h"
+#import "NSURL+iMedia.h"
 #import "NSWorkspace+iMedia.h"
 #import "SBUtilities.h"
 #import <Quartz/Quartz.h>
@@ -96,7 +97,7 @@
 
 + (NSString*) identifier
 {
-	[[self class] imb_throwAbstractBaseClassExceptionForSelector:_cmd];
+	[self imb_throwAbstractBaseClassExceptionForSelector:_cmd];
 
 	return nil;
 }
@@ -126,21 +127,22 @@
 	if ([self lightroomPath] != nil) {
 		NSArray* libraryPaths = [self libraryPaths];
 		
-		for (NSString* libraryPath in libraryPaths) {
-			IMBLightroomModernParser* parser = [[[[self class] alloc] init] autorelease];
-			parser.identifier = [NSString stringWithFormat:@"%@:/%@",[[self class] identifier],libraryPath];
-			parser.mediaSource = [NSURL fileURLWithPath:libraryPath];
-			parser.mediaType = inMediaType;
-			parser.shouldDisplayLibraryName = libraryPaths.count > 1;
-					
-			if (! [parser checkDatabaseVersion]) {
-				continue;
-			}
-			
-			[parserInstances addObject:parser];
-		}
-	}
-	
+        for (NSString* libraryPath in libraryPaths) {
+            NSURL *libraryPathURL = [NSURL fileURLWithPath:libraryPath];
+            IMBResourceAccessibility libraryAccessibility = [libraryPathURL imb_accessibility];
+            
+            if (libraryAccessibility != kIMBResourceDoesNotExist) {
+                IMBLightroomModernParser* parser = [[[[self class] alloc] init] autorelease];
+                parser.identifier = [NSString stringWithFormat:@"%@:/%@",[[self class] identifier],libraryPath];
+                parser.mediaSource = libraryPathURL;
+                parser.mediaType = inMediaType;
+                parser.shouldDisplayLibraryName = libraryPaths.count > 1;
+                
+                [parserInstances addObject:parser];
+            }
+        }
+    }
+    
 	return parserInstances;
 }
 
@@ -151,32 +153,63 @@
 
 - (NSNumber*) databaseVersion
 {
-	FMDatabase *database = [self database];
-	NSNumber *databaseVersion = nil;
-	
-	if (database != nil) {		
+	__block NSNumber *databaseVersion = nil;
+
+	[self inLibraryDatabase:^(FMDatabase *libraryDatabase) {
+		if (libraryDatabase == nil) {
+			return;
+		}
+
 		NSString* query =	@" SELECT value"
 		@" FROM Adobe_variablesTable avt"
 		@" WHERE avt.name = ?"
 		@" LIMIT 1";
-		
-		FMResultSet* results = [database executeQuery:query, @"Adobe_DBVersion"];
-		
-		if ([results next]) {				
+
+		FMResultSet* results = [libraryDatabase executeQuery:query, @"Adobe_DBVersion"];
+
+        if ([libraryDatabase hadError]) {
+            NSLog(@"DB Error %d: %@", [libraryDatabase lastErrorCode], [libraryDatabase lastErrorMessage]);
+        }
+        if ([results next]) {
 			databaseVersion = [NSNumber numberWithLong:[results longForColumn:@"value"]];
 		}
-		
+
 		[results close];
-	}
-	
+	}];
+
 	return databaseVersion;
 }
 
 // This method creates the immediate subnodes of the "Lightroom" root node. The two subnodes are "Folders"  
 // and "Collections"...
 
-- (void) populateSubnodesForRootNode:(IMBNode*)inRootNode
+- (void) populateSubnodesForRootNode:(IMBNode*)inRootNode error:(NSError**)outError
 {
+    if (! [self checkDatabaseVersion]) {
+        if (outError != NULL) {
+            NSString *lightroomVersion = [[self class] lightroomAppVersion];
+            NSString *localizedErrorDescriptionFormat = NSLocalizedStringWithDefaultValue(
+                                                                                          @"IMBLightroomParser.IncompatibleCatalogVersion",
+                                                                                          nil, IMBBundle(),
+                                                                                          @"Catalog %@ is associated with Lightroom version %@ but has an incompatible version.\n\nYou may want to try to open it with Lightroom %@ first to update it. If successful please re-start the application.",
+                                                                                          @"Warning when Lightroom database version check fails");
+            NSString *localizedErrorDescription = [NSString stringWithFormat:localizedErrorDescriptionFormat, [self.mediaSource path], lightroomVersion, lightroomVersion];
+            
+            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                                      localizedErrorDescription, NSLocalizedDescriptionKey, nil];
+            
+            *outError = [NSError errorWithDomain:kIMBErrorDomain code:1 userInfo:userInfo];
+        }
+        
+        // Use empty array for subnodes and objects. This prevents further attempts at populating the node
+        [inRootNode mutableArrayForPopulatingSubnodes];
+        inRootNode.objects = [NSArray array];
+
+        //inRootNode.accessibility = kIMBResourceDoesNotExist;
+        
+        return;
+    }
+    
 	NSMutableArray* subnodes = [inRootNode mutableArrayForPopulatingSubnodes];
 	NSMutableArray* objects = [NSMutableArray array];
 	inRootNode.displayedObjectCount = 0;
@@ -254,11 +287,14 @@
 
 - (NSString*) pyramidPathForImage:(NSNumber*)idLocal
 {
-	FMDatabase *database = [self database];
-	NSString *uuid = nil;
-	NSString *digest = nil;
+	__block NSString *uuid = nil;
+	__block NSString *digest = nil;
 
-	if (database != nil) {
+	[self inLibraryDatabase:^(FMDatabase *libraryDatabase) {
+		if (libraryDatabase == nil) {
+			return;
+		}
+		
 		NSString* query =	@" SELECT alf.id_global uuid, ids.digest"
 		@" FROM Adobe_imageDevelopSettings ids"
 		@" INNER JOIN Adobe_images ai ON ai.id_local = ids.image"
@@ -266,7 +302,7 @@
 		@" WHERE ids.image = ?"
 		@" ORDER BY alf.id_global ASC";
 
-		FMResultSet* results = [database executeQuery:query, idLocal];
+		FMResultSet* results = [libraryDatabase executeQuery:query, idLocal];
 
         // JJ/2012-10-02: For some reason we may get multiple rows with some of them not properly filled. Try best we can.
 
@@ -277,7 +313,7 @@
         }
 
 		[results close];
-	}
+	}];
 
 	if ((uuid != nil) && (digest != nil)) {
 		NSString* prefixOne = [uuid substringToIndex:1];
@@ -348,7 +384,7 @@
 
 			NSData* jpegData = nil;
 
-            if ((index + headerLengthValue + dataLengthValue) < [data length]) {
+            if ((index + headerLengthValue + dataLengthValue) <= [data length]) {
                 jpegData = [data subdataWithRange:NSMakeRange(index + headerLengthValue, dataLengthValue)];
             }
 			else {
@@ -601,14 +637,71 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 
-- (FMDatabase*) libraryDatabase
+- (BOOL)hasDatabaseAccessWithError:(NSError **)pError
+{
+    __block BOOL hasAccess = NO;
+    
+    [self inLibraryDatabase:^(FMDatabase *libraryDatabase) {
+        if (libraryDatabase == nil) {
+            return;
+        }
+        
+        // Check for catalog access by simply trying to query the database version
+        
+        NSString* query =    @" SELECT value"
+        @" FROM Adobe_variablesTable avt"
+        @" WHERE avt.name = ?"
+        @" LIMIT 1";
+        
+        FMResultSet* results = [libraryDatabase executeQuery:query, @"Adobe_DBVersion"];
+        
+        if (![libraryDatabase hadError]) {
+            hasAccess = YES;
+        } else {
+            hasAccess = NO;
+            
+            if (pError) {
+                NSInteger sqliteErrorCode = [libraryDatabase lastErrorCode];
+                switch (sqliteErrorCode) {
+                    case 14: {
+                        NSString *localizedErrorDescriptionFormat =
+                        NSLocalizedStringWithDefaultValue(@"IMBLightroomParser.MustRunLightroom",
+                                                          nil, IMBBundle(),
+                                                          @"Please run Lightroom %@ to gain access to its catalog. Then hit \"Reload\" from the context menu.",
+                                                          @"Warning when catalog can't be opened");
+                        NSString *localizedErrorDescription = [NSString stringWithFormat:localizedErrorDescriptionFormat,
+                                                               [self.class lightroomAppVersion]];
+                        
+                        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                                                  localizedErrorDescription, NSLocalizedDescriptionKey, nil];
+                        
+                        *pError = [NSError errorWithDomain:kIMBErrorDomain code:sqliteErrorCode userInfo:userInfo];
+                        break;
+                    }
+                        
+                        
+                    default:
+                        break;
+                }
+            }
+            
+            NSLog(@"DB Error %d: %@", [libraryDatabase lastErrorCode], [libraryDatabase lastErrorMessage]);
+        }
+        
+        [results close];
+    }];
+    
+    return hasAccess;
+}
+
+- (FMDatabasePool*) createLibraryDatabasePool;
 {
 	[[self class] imb_throwAbstractBaseClassExceptionForSelector:_cmd];
 	
 	return nil;
 }
 
-- (FMDatabase*) previewsDatabase
+- (FMDatabasePool*) createThumbnailDatabasePool;
 {
 	[[self class] imb_throwAbstractBaseClassExceptionForSelector:_cmd];
 	

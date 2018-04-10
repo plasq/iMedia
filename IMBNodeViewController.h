@@ -71,6 +71,7 @@
 #pragma mark HEADERS
 
 #import "IMBOutlineView.h"
+#import "IMBNavigationController.h"
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -97,16 +98,19 @@ extern NSString* kIMBExpandAndSelectNodeWithIdentifierNotification;
 
 #pragma mark 
 
-@interface IMBNodeViewController : NSViewController <NSOutlineViewDataSource,IMBOutlineViewDelegate,NSSplitViewDelegate>
+@interface IMBNodeViewController : NSViewController <NSOutlineViewDataSource,IMBOutlineViewDelegate,NSSplitViewDelegate,IMBNavigable>
 {
 	IBOutlet NSSplitView* ibSplitView;
 	IBOutlet IMBOutlineView* ibNodeOutlineView;
 	IBOutlet NSPopUpButton* ibNodePopupButton;
+    IBOutlet NSControl* ibBackButton;
+    IBOutlet NSControl* ibForwardButton;
 	IBOutlet NSView* ibHeaderContainerView;
 	IBOutlet NSView* ibObjectContainerView;
 	IBOutlet NSView* ibFooterContainerView;
 	
 	IMBLibraryController* _libraryController;
+    IMBNavigationController* _navigationController;
 	NSString* _selectedNodeIdentifier;
 	NSMutableArray* _expandedNodeIdentifiers;
 	BOOL _isRestoringState;
@@ -164,7 +168,7 @@ extern NSString* kIMBExpandAndSelectNodeWithIdentifierNotification;
 
 - (NSMenu*) menuForNode:(IMBNode*)inNode;
 
-// Actions...
+# pragma mark Actions
 
 - (BOOL) canReloadNode;
 - (IBAction) reloadNode:(id)inSender;
@@ -175,8 +179,11 @@ extern NSString* kIMBExpandAndSelectNodeWithIdentifierNotification;
 - (BOOL) canRemoveNode;
 - (IBAction) removeNode:(id)inSender;
 
+# pragma mark Navigation
 
-// Object Views...
+@property (nonatomic, readonly, strong) IBOutlet IMBNavigationController *navigationController;
+
+# pragma mark Object Views
 
 @property (retain) NSViewController* standardHeaderViewController;
 @property (retain) NSViewController* standardObjectViewController;
@@ -195,7 +202,7 @@ extern NSString* kIMBExpandAndSelectNodeWithIdentifierNotification;
 - (void) setObjectContainerViewNeedsDisplay:(BOOL)inFlag;
 
 
-// View accessors...
+# pragma mark View accessors
 
 @property (readonly) IMBOutlineView* nodeOutlineView;
 @property (readonly) NSPopUpButton* nodePopupButton;

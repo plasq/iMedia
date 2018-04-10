@@ -66,6 +66,7 @@
 #import "IMBNode.h"
 #import "IMBNodeCell.h"
 #import "IMBFlickrNode.h"
+#import "IMBNodeObject.h"
 #import "NSView+iMedia.h"
 #import "NSImage+iMedia.h"
 #import "NSObject+iMedia.h"
@@ -96,14 +97,116 @@ NSString* kIMBExpandAndSelectNodeWithIdentifierNotification = @"IMBExpandAndSele
 static NSMutableDictionary* sRegisteredNodeViewControllerClasses = nil;
 
 
+#pragma mark -
+
+@interface IMBNodeViewControllerState : NSObject <IMBNavigationLocation>
+{
+    NSString *_nodeIdentifier;
+    CGFloat _objectViewRelativeScrollPosition;
+}
+@property (nonatomic,strong) NSString *nodeIdentifier;
+@property (nonatomic) CGFloat objectViewRelativeScrollPosition;
+
+@end
+
+@implementation IMBNodeViewControllerState
+
+@synthesize nodeIdentifier = _nodeIdentifier;
+@synthesize objectViewRelativeScrollPosition = _objectViewRelativeScrollPosition;
+
+/** Designated initializer */
+- (instancetype)initWithController:(IMBNodeViewController *)controller
+{
+    self = [super init];
+    if (self) {
+        self.nodeIdentifier = controller.selectedNodeIdentifier;
+
+        NSAssert(self.nodeIdentifier != nil, @"%@: Node identifier must not be nil", self);
+
+        if ([controller.objectViewController isKindOfClass:[IMBObjectViewController class]]) {
+            IMBObjectViewController *objectViewController = (IMBObjectViewController *)controller.objectViewController;
+            NSClipView *objectClipView = [[[objectViewController selectedObjectView] enclosingScrollView] contentView];
+            self.objectViewRelativeScrollPosition = objectClipView.bounds.origin.y / objectClipView.documentRect.size.height;
+        }
+    }
+    return self;
+}
+
+- (void) dealloc
+{
+	IMBRelease(_nodeIdentifier);
+	
+	[super dealloc];
+}
+
+/** Convenience factory */
++ (instancetype)stateOfController:(IMBNodeViewController *)controller
+{
+    return [[[IMBNodeViewControllerState alloc] initWithController:controller] autorelease];
+}
+
+/**
+ Set state represented by receiver onto node view controller.
+ 
+ @return YES if node could be found, selected, and scrolled to visible in outline view. NO otherwise.
+ */
+- (BOOL) setOnController:(IMBNodeViewController *)controller
+{
+    BOOL success = NO;
+    NSAssert(self.nodeIdentifier != nil, @"%@: Node identifier must not be nil", self);
+    
+    // Select node identified by state in outline view and scroll it to visible
+    
+    IMBNode *targetNode = nil;
+    NSInteger row = [controller.nodeOutlineView rowForNode:&targetNode withIdentifier:self.nodeIdentifier];
+    
+    if (targetNode) {
+        [controller.nodeOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+        [controller.nodeOutlineView scrollRowToVisible:row];
+        
+        if ([controller.objectViewController isKindOfClass:[IMBObjectViewController class]])
+        {
+            IMBObjectViewController *objectViewController = (IMBObjectViewController *)controller.objectViewController;
+            NSView *objectView = [objectViewController selectedObjectView];
+            NSScrollView *scrollView = [objectView enclosingScrollView];
+            NSClipView *objectClipView = [scrollView contentView];
+            
+            CGFloat maxScrollPosition = objectClipView.documentRect.size.height - objectClipView.frame.size.height;
+            CGFloat desiredScrollPosition = self.objectViewRelativeScrollPosition * objectClipView.documentRect.size.height;
+            NSPoint objectViewOrigin = NSMakePoint(0, MIN(maxScrollPosition, desiredScrollPosition));
+            
+            [objectClipView scrollToPoint:objectViewOrigin];
+            [scrollView reflectScrolledClipView:objectClipView];
+        }
+        success = YES;
+    }
+    return success;
+}
+
+#pragma mark Description
+
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"%@ (Scroll pos. %.1f %%)", self.nodeIdentifier, self.objectViewRelativeScrollPosition * 100.0];
+}
+
+@end
+
+#pragma mark -
+
 //----------------------------------------------------------------------------------------------------------------------
 
+@interface IMBNodeViewController ()
 
+@property (nonatomic, readwrite, strong) IBOutlet IMBNavigationController *navigationController;
+
+@end
 #pragma mark 
 
 @implementation IMBNodeViewController
 
 @synthesize libraryController = _libraryController;
+@synthesize navigationController = _navigationController;
 @synthesize delegate = _delegate;
 @synthesize selectedNodeIdentifier = _selectedNodeIdentifier;
 @synthesize expandedNodeIdentifiers = _expandedNodeIdentifiers;
@@ -228,7 +331,8 @@ static NSMutableDictionary* sRegisteredNodeViewControllerClasses = nil;
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	[self _stopObservingLibraryController];
 	
-	IMBRelease(_libraryController);
+    IMBRelease(_libraryController);
+    IMBRelease(_navigationController);
 	IMBRelease(_selectedNodeIdentifier);
 	IMBRelease(_expandedNodeIdentifiers);
 	IMBRelease(_standardHeaderViewController);
@@ -291,8 +395,10 @@ static NSMutableDictionary* sRegisteredNodeViewControllerClasses = nil;
 	
 	[ibNodePopupButton removeAllItems];
 	[self __updatePopupMenu];
+    
+    [self.navigationController setupBackButton:ibBackButton];
+    [self.navigationController setupForwardButton:ibForwardButton];
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -544,8 +650,13 @@ static NSMutableDictionary* sRegisteredNodeViewControllerClasses = nil;
 	{
         NSURL *aURL = [NSURL fileURLWithPath:path isDirectory:YES];
         
-        NSNumber *isDirectory;
-        if ([aURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL] && [isDirectory boolValue])
+        NSNumber *isDirectory = nil;
+		[aURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL];
+
+		NSNumber *isPackage = nil;
+		[aURL getResourceValue:&isPackage forKey:NSURLIsPackageKey error:NULL];
+		
+        if (isDirectory.boolValue == YES && isPackage.boolValue == NO)
 		{
 			[inOutlineView setDropItem:nil dropChildIndex:NSOutlineViewDropOnItemIndex]; // Target the whole view
 			return NSDragOperationCopy;
@@ -721,6 +832,7 @@ static NSMutableDictionary* sRegisteredNodeViewControllerClasses = nil;
 - (void) outlineViewItemDidCollapse:(NSNotification*)inNotification
 {
 	[self _setExpandedNodeIdentifiers];
+    [self.navigationController validateLocations];
 }
 
 
@@ -763,6 +875,15 @@ static NSMutableDictionary* sRegisteredNodeViewControllerClasses = nil;
 		NSInteger row = [ibNodeOutlineView selectedRow];
 		IMBNode* newNode = row>=0 ? [ibNodeOutlineView nodeAtRow:row] : nil;
 
+        if (row >=0 && !self.navigationController.goingBackOrForward) {
+            IMBNodeViewControllerState *state = [IMBNodeViewControllerState stateOfController:self];
+            
+            // Current scroll position and view height might have changed since state was pushed
+            if ([self isValidLocation:state]) {
+                [self.navigationController updateCurrentLocationWithLocation:state];
+            }
+        }
+        
 		if (newNode)
 		{
 			if (newNode.accessibility == kIMBResourceIsAccessible)
@@ -789,7 +910,15 @@ static NSMutableDictionary* sRegisteredNodeViewControllerClasses = nil;
 		
 		[self installObjectViewForNode:newNode];
         [(IMBObjectViewController*)self.objectViewController setCurrentNode:newNode];
-		
+        
+        if (row >=0 && !self.navigationController.goingBackOrForward) {
+            IMBNodeViewControllerState *state = [IMBNodeViewControllerState stateOfController:self];
+            
+            if ([self isValidLocation:state]) {
+                [self.navigationController pushLocation:state];
+            }
+        }
+        
 //		// If a completely different parser was selected, then notify the previous parser, that it is most
 //		// likely no longer needed any can get rid of its cached data...
 //		
@@ -991,6 +1120,78 @@ static NSMutableDictionary* sRegisteredNodeViewControllerClasses = nil;
 
 
 #pragma mark
+#pragma mark IMBNavigable Protocol
+
+/**
+ @return Whether receiver could go to location.
+ @discussion
+ Location in terms of the receiver is an IMBNodeViewControllerState object.
+ */
+- (BOOL) gotoLocation:(id<IMBNavigationLocation>)location
+{
+    return [(IMBNodeViewControllerState *)location setOnController:self];
+}
+
+/**
+ */
+- (id<IMBNavigationLocation>)currentLocation
+{
+    return [IMBNodeViewControllerState stateOfController:self];
+}
+
+/**
+ Returns whether the receiver can match the provided location with an existing row.
+ @discussion Since location preserves a state that has been determined earlier it might well be that the location is no longer valid in the treeview (e.g. the user already collapsed its parent node)
+ */
+- (BOOL)isValidLocation:(id<IMBNavigationLocation>)location
+{
+    IMBNode *targetNode = nil;
+    NSInteger row = [self.nodeOutlineView rowForNode:&targetNode withIdentifier:((IMBNodeViewControllerState *)location).nodeIdentifier];
+    return (row >= 0);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+
+
+#pragma mark
+#pragma mark IMBNavigationControllerDelegate
+
+- (void)didSetupBackButton:(NSControl *)newButton
+{
+    ibBackButton = newButton;
+    ibBackButton.enabled = NO;
+    ibBackButton.hidden = NO;
+    
+    if ([ibBackButton isKindOfClass:[NSButton class]] && !((NSButton *)ibBackButton).image) {
+        ((NSButton *)ibBackButton).image = [NSImage imageNamed:NSImageNameGoLeftTemplate];
+    }
+}
+
+- (void)didSetupForwardButton:(NSControl *)newButton
+{
+    ibForwardButton = newButton;
+    ibForwardButton.enabled = NO;
+    ibForwardButton.hidden = NO;
+
+    if ([ibForwardButton isKindOfClass:[NSButton class]] && !((NSButton *)ibForwardButton).image) {
+        ((NSButton *)ibForwardButton).image = [NSImage imageNamed:NSImageNameGoRightTemplate];
+    }
+}
+
+- (void)didChangeNavigationController:(IMBNavigationController *)navigationController
+{
+    ibBackButton.enabled = [navigationController canGoBackward];
+    ibBackButton.hidden = NO;
+    ibForwardButton.enabled = [navigationController canGoForward];
+    ibForwardButton.hidden = NO;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+
+
+#pragma mark
 #pragma mark Access Control
 
 - (void) requestAccessToNode:(IMBNode*)inNode completion:(void(^)(BOOL requestCanceled, NSArray* affectedNodes, NSError* error))inCompletion
@@ -1077,7 +1278,15 @@ static NSMutableDictionary* sRegisteredNodeViewControllerClasses = nil;
 		inPosition = MAX(inPosition,minPos);
 		inPosition = MIN(inPosition,maxPos);
 	}
-	
+
+	// Further constrain the offset so that the split view divider's position is integral. The split
+	// view will, in response to user dragging, attempt to position the divider at extremely non-integral
+	// positions. I thought at first that we could just round to a pixel offset for the backing store
+	// (e.g. allow 0.5 offsets when running on @2x Retina), but in my tests that is not sufficient to
+	// address issues. This alleviates a "flickery" look that occurs when NSSplitView allows our
+	// subviews to be resized to non-integral sizes and e.g. subtly overlap the edges of the split view divider.
+	inPosition = floorf(inPosition);
+
 	NSMutableDictionary* stateDict = [self _preferences];
 	[stateDict setObject:[NSNumber numberWithFloat:inPosition] forKey:@"splitviewPosition"];
 	[self _setPreferences:stateDict];
@@ -1262,7 +1471,7 @@ static NSMutableDictionary* sRegisteredNodeViewControllerClasses = nil;
 			selectedNodeIdentifier = identifier;
 		}
 	
-		if ([identifier isEqualToString:selectedNodeIdentifier])
+		if (selectedNodeIdentifier && [identifier isEqualToString:selectedNodeIdentifier])
 		{
 			[self selectNode:node];
 			found = YES;
@@ -1315,20 +1524,24 @@ static NSMutableDictionary* sRegisteredNodeViewControllerClasses = nil;
 		{
 			NSInteger row = [ibNodeOutlineView rowForItem:inNode];
 			[ibNodeOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-			if ((inNode.accessibility == kIMBResourceIsAccessible) &&
-                !(inNode.isPopulated || inNode.isLoading))
+			[self _setView:ibNodeOutlineView needsDisplay:YES];
+			
+			if ((inNode.accessibility == kIMBResourceIsAccessible) && !(inNode.isPopulated || inNode.isLoading))
             {
                 [self.libraryController populateNode:inNode]; // Not redundant! Needed if selection doesn't change due to previous line!
-                [self.nodeOutlineView setNeedsDisplay];
+                [self _setView:ibNodeOutlineView needsDisplay:YES];
             }
+			
 			[self installObjectViewForNode:inNode];
 			[(IMBObjectViewController*)self.objectViewController setCurrentNode:inNode];
+            self.selectedNodeIdentifier = inNode.identifier;
 		}
 	}	
 	else
 	{
 		[ibNodeOutlineView selectRowIndexes:[NSIndexSet indexSet] byExtendingSelection:NO];
         [self installObjectViewForNode:nil];
+		[(IMBObjectViewController*)self.objectViewController setCurrentNode:nil];
 	}
 }
 
@@ -1532,15 +1745,23 @@ static NSMutableDictionary* sRegisteredNodeViewControllerClasses = nil;
 
 - (IBAction) reloadNode:(id)inSender
 {
-	IMBNode* node = [self selectedNode];
-    [self.libraryController reloadNodeTree:node errorHandler:^(NSError *error) {
-        if (error.code == kIMBResourceNoPermission) {
-            // Try again after requesting access (e.g. session may have expired).
+//	for (NSUInteger i=0; i<20; i++)		// Just for debugging purposes
+//	{
+		IMBNode* node = [self selectedNode];
+		
+		[self.libraryController reloadNodeTree:node errorHandler:^(NSError *error)
+		{
+			if (error.code == kIMBResourceNoPermission) {
+				// Try again after requesting access (e.g. session may have expired).
 
-            [self performSelector:@selector(reloadNodeTree:) withAccessRequestedToNode:node];
-        }
-    }];
-    [self.nodeOutlineView setNeedsDisplay];
+				[self performSelector:@selector(reloadNodeTree:) withAccessRequestedToNode:node];
+			}
+            [self.nodeOutlineView reloadItem:node];
+            [self.nodeOutlineView setNeedsDisplay];
+		}];
+        [self.nodeOutlineView reloadItem:node];
+		[self.nodeOutlineView setNeedsDisplay];
+//	}
 }
 
 
@@ -1875,11 +2096,22 @@ static NSMutableDictionary* sRegisteredNodeViewControllerClasses = nil;
 
 
 // Use this method in your host app to tell the current object view (icon, list, or combo view)
-// that it needs to re-display itself (e.g. when a badge on an image needs to be updated)
+// that it needs to re-display itself (e.g. when a badge on an image needs to be updated). To be
+// on the safe side when the view hierarchy is layer-based, redraw the whole subtree...
 
 - (void) setObjectContainerViewNeedsDisplay:(BOOL)inFlag
 {
-	[ibObjectContainerView setNeedsDisplay:inFlag];
+	[self _setView:ibObjectContainerView needsDisplay:inFlag];
+}
+
+- (void) _setView:(NSView*)inView needsDisplay:(BOOL)inFlag
+{
+	[inView setNeedsDisplay:inFlag];
+
+	for (NSView* subview in inView.subviews)
+	{
+		[self _setView:subview needsDisplay:inFlag];
+	}
 }
 
 

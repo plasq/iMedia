@@ -85,6 +85,7 @@
 #import "IMBObject.h"
 #import "IMBNode.h"
 #import "IMBParserMessenger.h"
+#import "IMBAppleMediaLibraryParserMessenger.h"
 #import "IMBCommon.h"
 #import "IMBOperationQueue.h"
 #import "IMBObjectThumbnailLoadOperation.h"
@@ -399,7 +400,11 @@ NSString* kIMBObjectPasteboardType = @"com.karelia.imedia.IMBObject";
 	}
 	else if ([[self URL] isFileURL])
 	{
-		icon = [[NSWorkspace imb_threadSafeWorkspace] iconForFileType:self.type];
+		NSString* iconType = self.type;
+		if (iconType != nil)
+		{
+			icon = [[NSWorkspace imb_threadSafeWorkspace] iconForFileType:iconType];
+		}
 	}
 	
 	return icon;
@@ -569,7 +574,7 @@ NSString* kIMBObjectPasteboardType = @"com.karelia.imedia.IMBObject";
 	// using 'public.bookmark' instead kUTTypeBookmark, which is not available before 10.10
     else if ([inType isEqualToString:@"public.bookmark"])
     {
-        [self _URLByRequestingAndResolvingBookmark];
+        [self requestBookmarkWithError:nil];    // Ensures bookmark is set
         [inItem setData:self.locationBookmark forType:@"public.bookmark"];
     }
     
@@ -655,6 +660,8 @@ NSString* kIMBObjectPasteboardType = @"com.karelia.imedia.IMBObject";
 
 - (void) loadThumbnail
 {
+	if ([IMBConfig suspendBackgroundTasks]) return;
+
 	if (self.needsImageRepresentation && !self.isLoadingThumbnail)
 	{
 		_isLoadingThumbnail = YES;
@@ -712,6 +719,8 @@ NSString* kIMBObjectPasteboardType = @"com.karelia.imedia.IMBObject";
 
 - (void) loadMetadata
 {
+	if ([IMBConfig suspendBackgroundTasks]) return;
+
 	if (self.metadata == nil && !self.isLoadingThumbnail)
 	{
 		IMBParserMessenger* messenger = self.parserMessenger;
@@ -826,10 +835,17 @@ NSString* kIMBObjectPasteboardType = @"com.karelia.imedia.IMBObject";
 /**
  Synchronous version of -requestBookmarkWithQueue:completionBlock:.
  
+ @discussion Will not request bookmark (and return NO) from Apple media library parser for any node object (IMBNodeObject) if request was posted synchronously on main thread (would block main thread indefinitely)
  @see requestBookmarkWithQueue:completionBlock:
  */
 - (BOOL)requestBookmarkWithError:(NSError **)outError
 {
+    // FIXME: No bookmark from Apple media library parser for node object if request was posted synchronously on main thread (would block main thread indefinitely)
+    if ([NSThread isMainThread] &&
+        [self isKindOfClass:[IMBNodeObject class]] &&
+        [self.parserMessenger isKindOfClass:[IMBAppleMediaLibraryParserMessenger class]]) {
+        return NO;
+    }
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
     __block BOOL success = YES;
     

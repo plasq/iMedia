@@ -75,6 +75,11 @@ IMBMLParserConfigurationFactory IMBMLPhotosParserConfigurationFactory =
 
 @implementation IMBApplePhotosParserConfiguration
 
+- (NSURL *)sourceURLForMediaGroup:(MLMediaGroup *)mediaGroup
+{
+    return self.mediaSource.attributes[@"libraryURL"];
+}
+
 /**
  */
 - (BOOL)shouldUseMediaGroup:(MLMediaGroup *)mediaGroup
@@ -144,15 +149,16 @@ IMBMLParserConfigurationFactory IMBMLPhotosParserConfigurationFactory =
 
 - (MLMediaObject *)keyMediaObjectForMediaGroup:(MLMediaGroup *)mediaGroup
 {
-    NSAssert(mediaGroup.identifier != nil, @"Identifier of media group %@ must not be nil",mediaGroup.name);
-    
     NSString *keyPhotoKey = mediaGroup.attributes[@"KeyPhotoKey"];
     
     // Gee, was hard to find out that this does the trick to enrich contents of attributes dictionary
     if (!keyPhotoKey) {
         [IMBAppleMediaLibraryPropertySynchronizer mediaObjectsForMediaGroup:mediaGroup];
-        mediaGroup = [self.mediaSource mediaGroupForIdentifier:mediaGroup.identifier];
-        keyPhotoKey = mediaGroup.attributes[@"KeyPhotoKey"];
+        
+        if (mediaGroup.identifier) {
+            mediaGroup = [self.mediaSource mediaGroupForIdentifier:mediaGroup.identifier];
+            keyPhotoKey = mediaGroup.attributes[@"KeyPhotoKey"];
+        }
     }
     if (keyPhotoKey) {
         return [self.mediaSource mediaObjectForIdentifier:keyPhotoKey];
@@ -279,7 +285,7 @@ IMBMLParserConfigurationFactory IMBMLPhotosParserConfigurationFactory =
                                                  nil, IMBBundle(), nil,
                                                  @"Format string for object count");
     }
-    return nil;
+    return [super countFormatForGroup:mediaGroup plural:plural];
 }
 
 #pragma mark - Utility

@@ -35,8 +35,7 @@ NSString *kIMBApertureMediaGroupIdentifierFaces = @"peopleAlbum";
 IMBMLParserConfigurationFactory IMBMLApertureParserConfigurationFactory =
 ^id<IMBAppleMediaLibraryParserDelegate>(MLMediaType mediaType)
 {
-    NSSet *identifiersOfNonUserCreatedGroups = [NSSet setWithObjects:
-                                                nil];
+    NSSet *identifiersOfNonUserCreatedGroups = [NSSet set];
     
     return [[IMBApertureParserConfiguration alloc] initWithMediaSourceIdentifier:MLMediaSourceApertureIdentifier
                                                     AppleMediaLibraryMediaType:mediaType
@@ -53,6 +52,11 @@ IMBMLParserConfigurationFactory IMBMLApertureParserConfigurationFactory =
     return @"Aperture";
 }
 
+- (NSURL *)sourceURLForMediaGroup:(MLMediaGroup *)mediaGroup
+{
+    return mediaGroup.attributes[@"URL"];
+}
+
 - (BOOL)shouldUseMediaGroup:(MLMediaGroup *)mediaGroup
 {
     NSSet *unqualifiedGroupIdentifiers = [NSSet setWithObjects:
@@ -64,8 +68,7 @@ IMBMLParserConfigurationFactory IMBMLApertureParserConfigurationFactory =
 
 - (BOOL)shouldReuseMediaObjectsOfParentGroupForGroup:(MLMediaGroup *)mediaGroup
 {
-    NSSet *qualifiedGroupIdentifiers = [NSSet setWithObjects:
-                                        nil];
+    NSSet *qualifiedGroupIdentifiers = [NSSet set];
     
     return [qualifiedGroupIdentifiers containsObject:mediaGroup.identifier];
 }

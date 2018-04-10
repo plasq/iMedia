@@ -16,7 +16,7 @@
 #import "IMBAppleMediaLibraryParserConfiguration.h"
 #import "IMBFaceObjectViewController.h"
 
-NSString *kIMBMediaGroupAttributeObjectMediaCount = @"ObjectMediaCount";
+NSString *kIMBMetadataObjectCountDescriptionKey = @"ObjectCountDescription";
 
 /**
  Reverse-engineered keys of the Photos app media source's attributes.
@@ -29,22 +29,6 @@ NSString *kIMBMediaSourceAttributeIdentifier = @"mediaSourceIdentifier";
  Attribute keys supported by iPhoto media source (as of OS X 10.10.3)
  */
 NSString *kIMBMediaRootGroupAttributeLibraryURL = @"URL";
-
-#pragma mark -
-
-@interface IMBMLParserMessengerSubclassConfiguration : NSObject
-{
-    NSMutableArray *parsers;
-    dispatch_once_t parsersCreationToken;
-    NSString *mediaType;
-    NSString *identifier;
-}
-
-@end
-
-@implementation IMBMLParserMessengerSubclassConfiguration
-
-@end
 
 #pragma mark -
 
@@ -131,7 +115,7 @@ NSString *kIMBMediaRootGroupAttributeLibraryURL = @"URL";
     Class myClass = [self class];
     dispatch_once([myClass parserInstancesOnceTokenRef], ^
                   {
-#warning Better encapsulate parser initialization in designated initializer of parser 
+                      // JJ/FIXME: Better encapsulate parser initialization in designated initializer of parser
                       IMBAppleMediaLibraryParser *parser = (IMBAppleMediaLibraryParser *)[self newParser];
                       MLMediaType mediaType = [IMBAppleMediaLibraryParser MLMediaTypeForIMBMediaType:[myClass mediaType]];
                       parser.configuration = [myClass parserConfigurationFactory](mediaType);
@@ -149,15 +133,19 @@ NSString *kIMBMediaRootGroupAttributeLibraryURL = @"URL";
  */
 - (NSString*) metadataDescriptionForMetadata:(NSDictionary*)inMetadata
 {
-//    // Events and Faces have other metadata than images
-//    
-//    if ([inMetadata objectForKey:kIMBMediaGroupAttributeObjectMediaCount])		// Event, face, ...
-//    {
-//        return [self _countableMetadataDescriptionForMetadata:inMetadata];
-//    }
+    // Node objects have other metadata than media objects
     
-    // Image
-    return [NSImage imb_imageMetadataDescriptionForMetadata:inMetadata];
+    NSString *metadataDescription = @"";
+    NSString *objectCountDescription = inMetadata[kIMBMetadataObjectCountDescriptionKey];
+    
+    if (objectCountDescription != nil)		// Event, face, ...
+    {
+        metadataDescription = objectCountDescription;
+    } else {
+        // Presumably an image
+        metadataDescription = [NSImage imb_imageMetadataDescriptionForMetadata:inMetadata];
+    }
+    return metadataDescription;
 }
 
 ///**
