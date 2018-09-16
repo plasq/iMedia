@@ -19,6 +19,10 @@
  */
 - (NSInteger)firstVisibleItemIndex;
 
+/**
+ */
+- (CGRect)draggingFrameForItemAtIndex:(NSUInteger)idx;
+
 @end
 
 #endif

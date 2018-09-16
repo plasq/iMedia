@@ -387,6 +387,33 @@ NSString* kIMBObjectPasteboardType = @"com.karelia.imedia.IMBObject";
 					
 //----------------------------------------------------------------------------------------------------------------------
 
+/**
+ Returns the receiver's .imageRepresentation in canonical NSImage format.
+ */
+- (NSImage *)thumbnail
+{
+    if (self.imageRepresentation == nil) {
+        return self.icon;
+    }
+    
+    if ([self.imageRepresentationType isEqualToString:IKImageBrowserNSImageRepresentationType])
+    {
+        return (NSImage *) self.imageRepresentation;
+    }
+    
+    if ([self.imageRepresentationType isEqualToString:IKImageBrowserCGImageRepresentationType])
+    {
+        return [[NSImage alloc] initWithCGImage:(CGImageRef) self.imageRepresentation size:CGSizeZero];
+    }
+    
+    if ([self.imageRepresentationType isEqualToString:IKImageBrowserNSDataRepresentationType])
+    {
+        return [[NSImage alloc] initWithData:(NSData *) self.imageRepresentation];
+    }
+    
+    return self.icon;
+}
+
 
 // Return a small generic icon for this file. This icon is displayed in the list view...
 
