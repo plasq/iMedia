@@ -20,6 +20,7 @@
 - (NSInteger)firstVisibleItemIndex;
 
 /**
+ Returns the dragging frame to be set on an NSDraggingItem upon creation.
  */
 - (CGRect)draggingFrameForItemAtIndex:(NSUInteger)idx;
 

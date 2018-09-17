@@ -1369,6 +1369,17 @@ static NSMutableDictionary* sRegisteredObjectViewControllerClasses = nil;
     session.animatesToStartingPositionsOnCancelOrFail = YES;
     session.draggingFormation = NSDraggingFormationDefault;
     
+    // Provide the IMBObjects to a static variable of Pasteboard, which is the fast path shortcut for
+    // intra application drags. These objects are released again in draggingSession:endedAtPoint:operation:
+    // of our object views...
+    
+    NSIndexSet *indexes = [self filteredDraggingIndexes:rowIndexes];
+    NSArray<IMBObject *> *draggedObjects = [[ibObjectArrayController arrangedObjects] objectsAtIndexes:indexes];
+    IMBParserMessenger *parserMessenger = draggedObjects.lastObject.parserMessenger;
+    
+    [NSPasteboard imb_setIMBObjects:draggedObjects];
+    [NSPasteboard imb_setParserMessenger:parserMessenger];
+    
     [session enumerateDraggingItemsWithOptions:0 forView:self.view classes:[NSArray arrayWithObject:[NSURL class]] searchOptions:@{} usingBlock:^(NSDraggingItem * _Nonnull draggingItem, NSInteger idx, BOOL * _Nonnull stop) {
         // Not sure whether we could do some useful stuff here. Maybe, adjust starting frame of
         // dragging item in case of a single item drag? (It may currently be a little off the cursor position)
@@ -1378,17 +1389,24 @@ static NSMutableDictionary* sRegisteredObjectViewControllerClasses = nil;
 
 /**
  This is crucial for correct multi-item drag. With this the NSTableView will ensure that
- each PasteboardItem is wrapped into a DraggingItem (as enforced by macOS 10.14 AppKit).
+ each PasteboardItem is wrapped into a DraggingItem (as enforced with Xcode 10 and macOS 10.14).
  */
 - (id<NSPasteboardWriting>)tableView:(NSTableView *)tableView pasteboardWriterForRow:(NSInteger)row
 {
     IMBObject* object = [[ibObjectArrayController arrangedObjects] objectAtIndex:row];
-    NSArray* types = [NSArray arrayWithObjects:kIMBObjectPasteboardType,(NSString*)kUTTypeFileURL,nil];
+
+    if (object.isSelectable && (object.accessibility == kIMBResourceIsAccessible ||
+                                object.accessibility == kIMBResourceIsAccessibleSecurityScoped))
+    {
+        NSArray* types = @[kIMBObjectPasteboardType,(NSString*)kUTTypeFileURL];
+        
+        NSPasteboardItem* item = [[NSPasteboardItem alloc] init];
+        [item setDataProvider:object forTypes:types];
+        
+        return item;
+    }
     
-    NSPasteboardItem* item = [[NSPasteboardItem alloc] init];
-    [item setDataProvider:object forTypes:types];
-    
-    return item;
+    return nil;
 }
 
 
@@ -2006,7 +2024,6 @@ static NSMutableDictionary* sRegisteredObjectViewControllerClasses = nil;
 	return indexes;
 }
 
-
 /**
  This method may be used for the IKImageBrowserView (icon view) and (theoretically) for
  the NSTableView (list and combo view). "Theoretically" because NSTableView currently (as of macOS 10.14)
@@ -2015,12 +2032,12 @@ static NSMutableDictionary* sRegisteredObjectViewControllerClasses = nil;
  Encapsulate all objects in IMBPasteboardItem and promise the kUTTypeFileURL type and wrap each item
  within an NSDraggingItem and begin an NSDraggingSession...
  */
-- (void)beginDraggingSessionWithEvent:(NSEvent *)event withinView:(NSView<NSDraggingSource, IMBItemizableView> *)sourceView forItemsAtIndexes:(NSIndexSet*)inIndexes;
+- (void)beginDraggingSessionWithEvent:(NSEvent *)event withinView:(NSView<NSDraggingSource, IMBItemizableView> *)sourceView forItemsAtIndexes:(NSIndexSet *)inIndexes;
 {
     NSIndexSet *indexes = [self filteredDraggingIndexes:inIndexes];
     NSMutableArray *draggedObjects = [NSMutableArray array];
     NSMutableArray *draggingItems = [NSMutableArray array];
-    NSArray *types = [NSArray arrayWithObjects:kIMBObjectPasteboardType,(NSString *)kUTTypeFileURL,nil];
+    NSArray *types = @[kIMBObjectPasteboardType,(NSString*)kUTTypeFileURL];
     __block IMBParserMessenger *parserMessenger = nil;
 
     NSArray *allObjects = [ibObjectArrayController arrangedObjects];
@@ -2052,15 +2069,13 @@ static NSMutableDictionary* sRegisteredObjectViewControllerClasses = nil;
     draggingSession.animatesToStartingPositionsOnCancelOrFail = YES;
     draggingSession.draggingFormation = NSDraggingFormationPile;
     
-    [NSPasteboard imb_setParserMessenger:parserMessenger];
+    // Provide the IMBObjects to a static variable of Pasteboard, which is the fast path shortcut for
+    // intra application drags. These objects are released again in draggingSession:endedAtPoint:operation:
+    // of our object views...
 
-    // Also set the objects in a global array, which is the fast path shortcut for intra application drags. These
-    // objects are released again in draggingSession:endedAtPoint:operation: of our object views...
-    
     [NSPasteboard imb_setIMBObjects:draggedObjects];
+    [NSPasteboard imb_setParserMessenger:parserMessenger];
 }
-
-//----------------------------------------------------------------------------------------------------------------------
 
 
 #pragma mark - Open Media Files
