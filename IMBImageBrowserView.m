@@ -326,6 +326,7 @@ enum IMBMouseOperation
 	
 	NSPoint mouse = [self convertPoint:[inEvent locationInWindow] fromView:nil];
 	_clickedObjectIndex = [self indexOfItemAtPoint:mouse];	
+	self.clickedObject = nil;
 	
 	if (_clickedObjectIndex != NSNotFound && [self.dataSource respondsToSelector:@selector(imageBrowser:itemAtIndex:)])
 	{

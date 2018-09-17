@@ -213,7 +213,8 @@ enum IMBMouseOperation
 	
 	NSPoint mouse = [self convertPoint:[inEvent locationInWindow] fromView:nil];
     _clickedObjectIndex = [self rowAtPoint:mouse];
-
+	self.clickedObject = nil;
+	
 	if (_clickedObjectIndex != -1)
 	{
 		NSArrayController* arrayController = nil;
