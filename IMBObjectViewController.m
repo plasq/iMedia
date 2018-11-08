@@ -2044,6 +2044,13 @@ static NSMutableDictionary* sRegisteredObjectViewControllerClasses = nil;
     
     [indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop)
     {
+        CGRect imageFrame = (CGRect) [sourceView draggingFrameForItemAtIndex:idx];
+        
+        // Dragging item will crash app when setting a frame of size (0,0) onto it. Safeguard.
+        if (imageFrame.size.width == 0 || imageFrame.size.height == 0) {
+            return;
+        }
+        
         IMBObject *object = allObjects[idx];
         [draggedObjects addObject:object];
         
@@ -2053,8 +2060,6 @@ static NSMutableDictionary* sRegisteredObjectViewControllerClasses = nil;
         [pasteBoardItem setDataProvider:object forTypes:types];
         
         NSDraggingItem *draggingItem = [[NSDraggingItem alloc] initWithPasteboardWriter:pasteBoardItem];
-        
-        CGRect imageFrame = (CGRect) [sourceView draggingFrameForItemAtIndex:idx];
         
         CGPoint draggingOrigin = [sourceView convertPoint:imageFrame.origin toView:self.view];
         CGRect draggingFrame = CGRectMake(draggingOrigin.x, draggingOrigin.y, imageFrame.size.width, imageFrame.size.height);
