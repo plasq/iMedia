@@ -392,8 +392,8 @@ NSString* kIMBObjectPasteboardType = @"com.karelia.imedia.IMBObject";
  */
 - (NSImage *)thumbnail
 {
-    if (self.imageRepresentation == nil) {
-        return self.icon;
+    if (_imageRepresentation == nil) {
+        return nil;
     }
     
     if ([self.imageRepresentationType isEqualToString:IKImageBrowserNSImageRepresentationType])

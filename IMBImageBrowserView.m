@@ -463,7 +463,11 @@ enum IMBMouseOperation
 
 - (CGRect)draggingFrameForItemAtIndex:(NSUInteger)idx
 {
-    return [[self cellForItemAtIndex:idx] imageFrame];
+    IKImageBrowserCell *cell = [self cellForItemAtIndex:idx];
+    if (cell) {
+        return [cell imageFrame];
+    }
+    return CGRectMake(0, 0, 0, 0);
 }
 
 

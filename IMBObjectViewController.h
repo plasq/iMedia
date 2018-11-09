@@ -83,6 +83,8 @@
 
 #pragma mark CONSTANTS
 
+#define MAX_NUM_DRAGGING_ITEMS 2000
+
 enum
 {
 	kIMBObjectViewTypeIcon,

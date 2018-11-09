@@ -2042,17 +2042,14 @@ static NSMutableDictionary* sRegisteredObjectViewControllerClasses = nil;
 
     NSArray *allObjects = [ibObjectArrayController arrangedObjects];
     
+    CGRect prototypeDraggingFrame = [sourceView draggingFrameForItemAtIndex:sourceView.firstVisibleItemIndex];
+    CGFloat maxDim = MAX(prototypeDraggingFrame.size.width, prototypeDraggingFrame.size.height);
+    
     [indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop)
     {
-        CGRect imageFrame = (CGRect) [sourceView draggingFrameForItemAtIndex:idx];
-        
-        // Dragging item will crash app when setting a frame of size (0,0) onto it. Safeguard.
-        if (imageFrame.size.width == 0 || imageFrame.size.height == 0) {
-            return;
-        }
+        CGRect imageFrame = [sourceView draggingFrameForItemAtIndex:idx];
         
         IMBObject *object = allObjects[idx];
-        [draggedObjects addObject:object];
         
         parserMessenger = object.parserMessenger;
         
@@ -2062,12 +2059,43 @@ static NSMutableDictionary* sRegisteredObjectViewControllerClasses = nil;
         NSDraggingItem *draggingItem = [[NSDraggingItem alloc] initWithPasteboardWriter:pasteBoardItem];
         
         CGPoint draggingOrigin = [sourceView convertPoint:imageFrame.origin toView:self.view];
-        CGRect draggingFrame = CGRectMake(draggingOrigin.x, draggingOrigin.y, imageFrame.size.width, imageFrame.size.height);
-        [draggingItem setDraggingFrame:draggingFrame contents:object.thumbnail];
-        [draggingItems addObject:draggingItem];
+        NSImage *thumbnail = object.thumbnail;
+        CGSize draggingSize;
+        if (imageFrame.size.width != 0 && imageFrame.size.height != 0) {
+            if (!thumbnail) {
+                draggingSize = imageFrame.size;
+            } else {
+                CGFloat maxThumbnailDim = MAX(thumbnail.size.width, thumbnail.size.height);
+                CGFloat scale = maxThumbnailDim != 0 ? maxDim / maxThumbnailDim : 1;
+                draggingSize.width = thumbnail.size.width * scale;
+                draggingSize.height = thumbnail.size.height * scale;
+            }
+        } else {
+            draggingSize = prototypeDraggingFrame.size;
+        }
+        CGRect draggingFrame = CGRectMake(draggingOrigin.x, draggingOrigin.y, draggingSize.width, draggingSize.height);
+        
+        // Dragging item will crash app when setting a frame of size (0,0) onto it. Safeguard.
+        if (draggingFrame.size.width != 0 && draggingFrame.size.height != 0) {
+            [draggingItem setDraggingFrame:draggingFrame];
+            if (thumbnail) {
+                draggingItem.imageComponentsProvider = ^NSArray<NSDraggingImageComponent *> * _Nonnull{
+                    NSDraggingImageComponent *imageComponent = [[NSDraggingImageComponent alloc] initWithKey:NSDraggingImageComponentIconKey];
+                    imageComponent.contents = thumbnail;
+                    imageComponent.frame = CGRectMake(0,0,draggingFrame.size.width, draggingFrame.size.height);
+                    return @[imageComponent];
+                };
+            }
+            [draggingItems addObject:draggingItem];
+            [draggedObjects addObject:object];
+        }
         
         [pasteBoardItem release];
         [draggingItem release];
+        
+        if (draggedObjects.count >= MAX_NUM_DRAGGING_ITEMS) {
+            *stop = YES;
+        }
     }];
     
     NSDraggingSession *draggingSession = [self.view beginDraggingSessionWithItems:draggingItems event:event source:sourceView];
