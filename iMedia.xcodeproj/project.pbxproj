@@ -170,9 +170,9 @@
 		30FD64671546AF6E0036BDE2 /* NSPasteboard+iMedia.m in Sources */ = {isa = PBXBuildFile; fileRef = 30FD64651546AF6E0036BDE2 /* NSPasteboard+iMedia.m */; };
 		30FD646B1546BAE90036BDE2 /* IMBApertureHeaderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8FCA064112368388009072AE /* IMBApertureHeaderViewController.m */; };
 		30FFEBFE150A0AA70009C1D0 /* im.edia.iPhoto.xpc in Copy XPCServices */ = {isa = PBXBuildFile; fileRef = 30FFEBEC150A08DB0009C1D0 /* im.edia.iPhoto.xpc */; };
-		4947C21B22F053CD00D65CA3 /* XPCKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4947C1E022F052CA00D65CA3 /* XPCKit.framework */; };
-		4947C21C22F053CD00D65CA3 /* ObjectiveFlickr.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4947C1D422F052B600D65CA3 /* ObjectiveFlickr.framework */; };
-		4947C21D22F053CD00D65CA3 /* PhFacebook.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4947C1CC22F0525100D65CA3 /* PhFacebook.framework */; };
+		4947C28A22F071C900D65CA3 /* ObjectiveFlickr.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4947C28722F071B300D65CA3 /* ObjectiveFlickr.framework */; };
+		4947C28B22F071C900D65CA3 /* XPCKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4947C27722F071A900D65CA3 /* XPCKit.framework */; };
+		4947C28C22F071C900D65CA3 /* PhFacebook.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4947C26D22F0719D00D65CA3 /* PhFacebook.framework */; };
 		6523FF231B0CE589004FD6D2 /* IMBItemizableView.h in Headers */ = {isa = PBXBuildFile; fileRef = 30BC5C641AFF22BE002BF87F /* IMBItemizableView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8DC2EF570486A6940098B216 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */; };
 		8F39FC5B1CA2995F00BBFA3D /* FMDatabasePool.h in Headers */ = {isa = PBXBuildFile; fileRef = 8F39FC591CA2995F00BBFA3D /* FMDatabasePool.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -701,75 +701,68 @@
 			remoteGlobalIDString = 30B83ACE1701AFDB000EC74E;
 			remoteInfo = im.edia.Facebook;
 		};
-		4947C1CB22F0525100D65CA3 /* PBXContainerItemProxy */ = {
+		4947C26C22F0719D00D65CA3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4947C1C722F0525100D65CA3 /* PhFacebook.xcodeproj */;
+			containerPortal = 4947C26822F0719D00D65CA3 /* PhFacebook.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
 			remoteInfo = PhFacebook;
 		};
-		4947C1D322F052B600D65CA3 /* PBXContainerItemProxy */ = {
+		4947C27622F071A900D65CA3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4947C1CD22F052B600D65CA3 /* ObjectiveFlickr.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 6A8666490F9593B200325E1C;
-			remoteInfo = "ObjectiveFlickr (framework)";
-		};
-		4947C1D522F052B600D65CA3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4947C1CD22F052B600D65CA3 /* ObjectiveFlickr.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 6ABF72E60F939BE600B9179E;
-			remoteInfo = "ObjectiveFlickr (library)";
-		};
-		4947C1DF22F052CA00D65CA3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4947C1D722F052CA00D65CA3 /* XPCKit.xcodeproj */;
+			containerPortal = 4947C26E22F071A900D65CA3 /* XPCKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 1EEDD0CF13DE9FAB00D5AEC3;
 			remoteInfo = XPCKit;
 		};
-		4947C1E122F052CA00D65CA3 /* PBXContainerItemProxy */ = {
+		4947C27822F071A900D65CA3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4947C1D722F052CA00D65CA3 /* XPCKit.xcodeproj */;
+			containerPortal = 4947C26E22F071A900D65CA3 /* XPCKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 1EEDD02813DD485400D5AEC3;
 			remoteInfo = libXPCKit;
 		};
-		4947C1E322F052CA00D65CA3 /* PBXContainerItemProxy */ = {
+		4947C27A22F071A900D65CA3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4947C1D722F052CA00D65CA3 /* XPCKit.xcodeproj */;
+			containerPortal = 4947C26E22F071A900D65CA3 /* XPCKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 1EEDD05913DD48BB00D5AEC3;
 			remoteInfo = TestApp;
 		};
-		4947C1E522F052CA00D65CA3 /* PBXContainerItemProxy */ = {
+		4947C27C22F071A900D65CA3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4947C1D722F052CA00D65CA3 /* XPCKit.xcodeproj */;
+			containerPortal = 4947C26E22F071A900D65CA3 /* XPCKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 1EEDD07513DD48D800D5AEC3;
 			remoteInfo = TestService;
 		};
-		4947C1E722F052CA00D65CA3 /* PBXContainerItemProxy */ = {
+		4947C27E22F071A900D65CA3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4947C1D722F052CA00D65CA3 /* XPCKit.xcodeproj */;
+			containerPortal = 4947C26E22F071A900D65CA3 /* XPCKit.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 1EEDD03C13DD485400D5AEC3;
 			remoteInfo = XPCKitTests;
 		};
-		4947C22A22F0540B00D65CA3 /* PBXContainerItemProxy */ = {
+		4947C28622F071B300D65CA3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 4947C1D722F052CA00D65CA3 /* XPCKit.xcodeproj */;
+			containerPortal = 4947C28022F071B200D65CA3 /* ObjectiveFlickr.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 6A8666490F9593B200325E1C;
+			remoteInfo = "ObjectiveFlickr (framework)";
+		};
+		4947C28822F071B300D65CA3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4947C28022F071B200D65CA3 /* ObjectiveFlickr.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 6ABF72E60F939BE600B9179E;
+			remoteInfo = "ObjectiveFlickr (library)";
+		};
+		4947C28D22F071F700D65CA3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4947C26E22F071A900D65CA3 /* XPCKit.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = 1EEDD0CE13DE9FAB00D5AEC3;
 			remoteInfo = XPCKit;
-		};
-		4947C22C22F0540B00D65CA3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4947C1CD22F052B600D65CA3 /* ObjectiveFlickr.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 6A8666480F9593B200325E1C;
-			remoteInfo = "ObjectiveFlickr (framework)";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -802,9 +795,9 @@
 			dstPath = "";
 			dstSubfolderSpec = 16;
 			files = (
-				4947C21B22F053CD00D65CA3 /* XPCKit.framework in CopyFiles */,
-				4947C21C22F053CD00D65CA3 /* ObjectiveFlickr.framework in CopyFiles */,
-				4947C21D22F053CD00D65CA3 /* PhFacebook.framework in CopyFiles */,
+				4947C28A22F071C900D65CA3 /* ObjectiveFlickr.framework in CopyFiles */,
+				4947C28B22F071C900D65CA3 /* XPCKit.framework in CopyFiles */,
+				4947C28C22F071C900D65CA3 /* PhFacebook.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -967,9 +960,9 @@
 		30FFEBEC150A08DB0009C1D0 /* im.edia.iPhoto.xpc */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = im.edia.iPhoto.xpc; sourceTree = BUILT_PRODUCTS_DIR; };
 		30FFEBEE150A08DB0009C1D0 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		32DBCF5E0370ADEE00C91783 /* iMedia.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iMedia.pch; sourceTree = "<group>"; };
-		4947C1C722F0525100D65CA3 /* PhFacebook.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = PhFacebook.xcodeproj; path = PhFacebook/PhFacebook.xcodeproj; sourceTree = "<group>"; };
-		4947C1CD22F052B600D65CA3 /* ObjectiveFlickr.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ObjectiveFlickr.xcodeproj; path = ObjectiveFlickr/ObjectiveFlickr.xcodeproj; sourceTree = "<group>"; };
-		4947C1D722F052CA00D65CA3 /* XPCKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = XPCKit.xcodeproj; path = XPCKit/XPCKit.xcodeproj; sourceTree = "<group>"; };
+		4947C26822F0719D00D65CA3 /* PhFacebook.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = PhFacebook.xcodeproj; path = PhFacebook/PhFacebook.xcodeproj; sourceTree = "<group>"; };
+		4947C26E22F071A900D65CA3 /* XPCKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = XPCKit.xcodeproj; path = XPCKit/XPCKit.xcodeproj; sourceTree = "<group>"; };
+		4947C28022F071B200D65CA3 /* ObjectiveFlickr.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ObjectiveFlickr.xcodeproj; path = ObjectiveFlickr/ObjectiveFlickr.xcodeproj; sourceTree = "<group>"; };
 		8DC2EF5A0486A6940098B216 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8DC2EF5B0486A6940098B216 /* iMedia.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = iMedia.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8F39FC591CA2995F00BBFA3D /* FMDatabasePool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FMDatabasePool.h; path = fmdb/src/fmdb/FMDatabasePool.h; sourceTree = "<group>"; };
@@ -1783,38 +1776,38 @@
 		490A494522F044BB000BC546 /* Subprojects */ = {
 			isa = PBXGroup;
 			children = (
-				4947C1D722F052CA00D65CA3 /* XPCKit.xcodeproj */,
-				4947C1CD22F052B600D65CA3 /* ObjectiveFlickr.xcodeproj */,
-				4947C1C722F0525100D65CA3 /* PhFacebook.xcodeproj */,
+				4947C28022F071B200D65CA3 /* ObjectiveFlickr.xcodeproj */,
+				4947C26E22F071A900D65CA3 /* XPCKit.xcodeproj */,
+				4947C26822F0719D00D65CA3 /* PhFacebook.xcodeproj */,
 			);
 			name = Subprojects;
 			sourceTree = "<group>";
 		};
-		4947C1C822F0525100D65CA3 /* Products */ = {
+		4947C26922F0719D00D65CA3 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4947C1CC22F0525100D65CA3 /* PhFacebook.framework */,
+				4947C26D22F0719D00D65CA3 /* PhFacebook.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		4947C1CE22F052B600D65CA3 /* Products */ = {
+		4947C26F22F071A900D65CA3 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4947C1D422F052B600D65CA3 /* ObjectiveFlickr.framework */,
-				4947C1D622F052B600D65CA3 /* libObjectiveFlickr.a */,
+				4947C27722F071A900D65CA3 /* XPCKit.framework */,
+				4947C27922F071A900D65CA3 /* libXPCKit.a */,
+				4947C27B22F071A900D65CA3 /* TestApp.app */,
+				4947C27D22F071A900D65CA3 /* com.mustacheware.TestService.xpc */,
+				4947C27F22F071A900D65CA3 /* XPCKitTests.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		4947C1D822F052CA00D65CA3 /* Products */ = {
+		4947C28122F071B200D65CA3 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4947C1E022F052CA00D65CA3 /* XPCKit.framework */,
-				4947C1E222F052CA00D65CA3 /* libXPCKit.a */,
-				4947C1E422F052CA00D65CA3 /* TestApp.app */,
-				4947C1E622F052CA00D65CA3 /* com.mustacheware.TestService.xpc */,
-				4947C1E822F052CA00D65CA3 /* XPCKitTests.octest */,
+				4947C28722F071B300D65CA3 /* ObjectiveFlickr.framework */,
+				4947C28922F071B300D65CA3 /* libObjectiveFlickr.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2771,8 +2764,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				4947C22B22F0540B00D65CA3 /* PBXTargetDependency */,
-				4947C22D22F0540B00D65CA3 /* PBXTargetDependency */,
+				4947C28E22F071F700D65CA3 /* PBXTargetDependency */,
 			);
 			name = iMedia;
 			productInstallPath = "$(HOME)/Library/Frameworks";
@@ -2989,7 +2981,7 @@
 		0867D690FE84028FC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1100;
+				LastUpgradeCheck = 1030;
 				TargetAttributes = {
 					307F9690183D090D004F87E0 = {
 						DevelopmentTeam = RM33QGZJ9T;
@@ -3077,16 +3069,16 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 4947C1CE22F052B600D65CA3 /* Products */;
-					ProjectRef = 4947C1CD22F052B600D65CA3 /* ObjectiveFlickr.xcodeproj */;
+					ProductGroup = 4947C28122F071B200D65CA3 /* Products */;
+					ProjectRef = 4947C28022F071B200D65CA3 /* ObjectiveFlickr.xcodeproj */;
 				},
 				{
-					ProductGroup = 4947C1C822F0525100D65CA3 /* Products */;
-					ProjectRef = 4947C1C722F0525100D65CA3 /* PhFacebook.xcodeproj */;
+					ProductGroup = 4947C26922F0719D00D65CA3 /* Products */;
+					ProjectRef = 4947C26822F0719D00D65CA3 /* PhFacebook.xcodeproj */;
 				},
 				{
-					ProductGroup = 4947C1D822F052CA00D65CA3 /* Products */;
-					ProjectRef = 4947C1D722F052CA00D65CA3 /* XPCKit.xcodeproj */;
+					ProductGroup = 4947C26F22F071A900D65CA3 /* Products */;
+					ProjectRef = 4947C26E22F071A900D65CA3 /* XPCKit.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -3112,60 +3104,60 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		4947C1CC22F0525100D65CA3 /* PhFacebook.framework */ = {
+		4947C26D22F0719D00D65CA3 /* PhFacebook.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = PhFacebook.framework;
-			remoteRef = 4947C1CB22F0525100D65CA3 /* PBXContainerItemProxy */;
+			remoteRef = 4947C26C22F0719D00D65CA3 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4947C1D422F052B600D65CA3 /* ObjectiveFlickr.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = ObjectiveFlickr.framework;
-			remoteRef = 4947C1D322F052B600D65CA3 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4947C1D622F052B600D65CA3 /* libObjectiveFlickr.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libObjectiveFlickr.a;
-			remoteRef = 4947C1D522F052B600D65CA3 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4947C1E022F052CA00D65CA3 /* XPCKit.framework */ = {
+		4947C27722F071A900D65CA3 /* XPCKit.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = XPCKit.framework;
-			remoteRef = 4947C1DF22F052CA00D65CA3 /* PBXContainerItemProxy */;
+			remoteRef = 4947C27622F071A900D65CA3 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4947C1E222F052CA00D65CA3 /* libXPCKit.a */ = {
+		4947C27922F071A900D65CA3 /* libXPCKit.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libXPCKit.a;
-			remoteRef = 4947C1E122F052CA00D65CA3 /* PBXContainerItemProxy */;
+			remoteRef = 4947C27822F071A900D65CA3 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4947C1E422F052CA00D65CA3 /* TestApp.app */ = {
+		4947C27B22F071A900D65CA3 /* TestApp.app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;
 			path = TestApp.app;
-			remoteRef = 4947C1E322F052CA00D65CA3 /* PBXContainerItemProxy */;
+			remoteRef = 4947C27A22F071A900D65CA3 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4947C1E622F052CA00D65CA3 /* com.mustacheware.TestService.xpc */ = {
+		4947C27D22F071A900D65CA3 /* com.mustacheware.TestService.xpc */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = com.mustacheware.TestService.xpc;
-			remoteRef = 4947C1E522F052CA00D65CA3 /* PBXContainerItemProxy */;
+			remoteRef = 4947C27C22F071A900D65CA3 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		4947C1E822F052CA00D65CA3 /* XPCKitTests.octest */ = {
+		4947C27F22F071A900D65CA3 /* XPCKitTests.octest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = XPCKitTests.octest;
-			remoteRef = 4947C1E722F052CA00D65CA3 /* PBXContainerItemProxy */;
+			remoteRef = 4947C27E22F071A900D65CA3 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		4947C28722F071B300D65CA3 /* ObjectiveFlickr.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = ObjectiveFlickr.framework;
+			remoteRef = 4947C28622F071B300D65CA3 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		4947C28922F071B300D65CA3 /* libObjectiveFlickr.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libObjectiveFlickr.a;
+			remoteRef = 4947C28822F071B300D65CA3 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -3816,15 +3808,10 @@
 			target = 30B83ACE1701AFDB000EC74E /* im.edia.Facebook */;
 			targetProxy = 490A49A222F046A6000BC546 /* PBXContainerItemProxy */;
 		};
-		4947C22B22F0540B00D65CA3 /* PBXTargetDependency */ = {
+		4947C28E22F071F700D65CA3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = XPCKit;
-			targetProxy = 4947C22A22F0540B00D65CA3 /* PBXContainerItemProxy */;
-		};
-		4947C22D22F0540B00D65CA3 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "ObjectiveFlickr (framework)";
-			targetProxy = 4947C22C22F0540B00D65CA3 /* PBXContainerItemProxy */;
+			targetProxy = 4947C28D22F071F700D65CA3 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
