@@ -56,6 +56,13 @@ IMBMLParserConfigurationFactory IMBMLiTunesParserConfigurationFactory =
  */
 - (NSString *)libraryName
 {
+	// PB 14.10.2019: This is just a quick hack to get the correct library name when running on Catalina.
+	// Didn't have the time for proper refactoring of this code.
+   	if (NSAppKitVersionNumber > 1671.5)
+    {
+		return @"Music";
+    }
+	
     return @"iTunes";
 }
 
