@@ -68,8 +68,29 @@ IMBMLParserConfigurationFactory IMBMLiTunesParserConfigurationFactory =
 
 - (BOOL)shouldUseMediaGroup:(MLMediaGroup *)mediaGroup
 {
-    NSSet *unqualifiedGroupIdentifiers = [NSSet set];
-    return (![unqualifiedGroupIdentifiers containsObject:mediaGroup.identifier]);
+//	NSSet *unqualifiedGroupIdentifiers = [NSSet set];
+//	return (![unqualifiedGroupIdentifiers containsObject:mediaGroup.identifier]);
+
+	// PB 14.10.2019: This is just a quick hack to filter out unwanted subnodes depending on mediaType
+	
+	NSString* identifier = mediaGroup.typeIdentifier;
+
+	if (self.mediaType == MLMediaTypeAudio)
+	{
+		return	[identifier isEqualToString:@"com.apple.iTunes.MusicPlaylist"] ||
+				[identifier isEqualToString:@"com.apple.iTunes.Playlist"] ||
+				[identifier isEqualToString:@"com.apple.iTunes.SmartPlaylist"];
+	}
+	else if (self.mediaType == MLMediaTypeMovie)
+	{
+		return	[identifier isEqualToString:@"com.apple.iTunes.MusicVideosPlaylist"] ||
+				[identifier isEqualToString:@"com.apple.iTunes.MoviesPlaylist"] ||
+				[identifier isEqualToString:@"com.apple.iTunes.VideoPlaylist"] ||
+				[identifier isEqualToString:@"com.apple.iTunes.MoviesPlaylist"] ||
+				[identifier isEqualToString:@"com.apple.iTunes.TVShowsPlaylist"];
+	}
+	
+	return NO;
 }
 
 - (BOOL)shouldReuseMediaObjectsOfParentGroupForGroup:(MLMediaGroup *)mediaGroup
