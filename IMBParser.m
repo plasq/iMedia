@@ -19,20 +19,20 @@
  persons to whom the Software is furnished to do so, subject to the following
  conditions:
  
-	Redistributions of source code must retain the original terms stated here,
-	including this list of conditions, the disclaimer noted below, and the
-	following copyright notice: Copyright (c) 2005-2012 by Karelia Software et al.
+ Redistributions of source code must retain the original terms stated here,
+ including this list of conditions, the disclaimer noted below, and the
+ following copyright notice: Copyright (c) 2005-2012 by Karelia Software et al.
  
-	Redistributions in binary form must include, in an end-user-visible manner,
-	e.g., About window, Acknowledgments window, or similar, either a) the original
-	terms stated here, including this list of conditions, the disclaimer noted
-	below, and the aforementioned copyright notice, or b) the aforementioned
-	copyright notice and a link to karelia.com/imedia.
+ Redistributions in binary form must include, in an end-user-visible manner,
+ e.g., About window, Acknowledgments window, or similar, either a) the original
+ terms stated here, including this list of conditions, the disclaimer noted
+ below, and the aforementioned copyright notice, or b) the aforementioned
+ copyright notice and a link to karelia.com/imedia.
  
-	Neither the name of Karelia Software, nor Sandvox, nor the names of
-	contributors to iMedia Browser may be used to endorse or promote products
-	derived from the Software without prior and express written permission from
-	Karelia Software or individual contributors, as appropriate.
+ Neither the name of Karelia Software, nor Sandvox, nor the names of
+ contributors to iMedia Browser may be used to endorse or promote products
+ derived from the Software without prior and express written permission from
+ Karelia Software or individual contributors, as appropriate.
  
  Disclaimer: THE SOFTWARE IS PROVIDED BY THE COPYRIGHT OWNER AND CONTRIBUTORS
  "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
@@ -41,7 +41,7 @@
  LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH, THE
  SOFTWARE OR THE USE OF, OR OTHER DEALINGS IN, THE SOFTWARE.
-*/
+ */
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -82,7 +82,7 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 
-#pragma mark 
+#pragma mark
 
 @implementation IMBParser
 
@@ -94,35 +94,35 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 
-#pragma mark 
+#pragma mark
 
 
 - (id) init
 {
-	if (self = [super init])
-	{
-		self.identifier = nil;
-		self.mediaType = nil;
-		self.mediaSource = nil;
-	}
-	
-	return self;
+    if (self = [super init])
+    {
+        self.identifier = nil;
+        self.mediaType = nil;
+        self.mediaSource = nil;
+    }
+    
+    return self;
 }
 
 
 - (void) dealloc
 {
-	IMBRelease(_identifier);
-	IMBRelease(_mediaSource);
-	IMBRelease(_mediaType);
-	[super dealloc];
+    IMBRelease(_identifier);
+    IMBRelease(_mediaSource);
+    IMBRelease(_mediaType);
+    [super dealloc];
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 
 
-#pragma mark 
+#pragma mark
 #pragma mark Node Creation
 
 
@@ -130,9 +130,9 @@
 
 - (IMBNode*) unpopulatedTopLevelNode:(NSError**)outError
 {
-	[self imb_throwAbstractBaseClassExceptionForSelector:_cmd];
-	if (outError) *outError = nil;
-	return nil;
+    [self imb_throwAbstractBaseClassExceptionForSelector:_cmd];
+    if (outError) *outError = nil;
+    return nil;
 }
 
 
@@ -140,40 +140,40 @@
 
 - (BOOL) populateNode:(IMBNode*)inNode error:(NSError**)outError
 {
-	[self imb_throwAbstractBaseClassExceptionForSelector:_cmd];
-	if (outError) *outError = nil; // never reached due to the exception, mind!
-	return YES;
+    [self imb_throwAbstractBaseClassExceptionForSelector:_cmd];
+    if (outError) *outError = nil; // never reached due to the exception, mind!
+    return YES;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 
 
-// This generic implementation may be sufficient for most subclasses. First remember how deeply the node  
+// This generic implementation may be sufficient for most subclasses. First remember how deeply the node
 // tree was populated. Then recreate this node. Finally repopulate the node tree to the same depth...
 
 - (IMBNode*) reloadNodeTree:(IMBNode*)inNode error:(NSError**)outError
 {
-	NSError* error = nil;
-	IMBNode* newNode = nil;
-	NSArray* identifiers = [self _identifiersOfPopulatedSubnodesOfNode:inNode];
-
-	if (inNode.isTopLevelNode)
-	{
-		newNode = [self unpopulatedTopLevelNode:&error];
-	}
-	else
-	{
-		newNode = inNode;
-	}
-	
-	if (newNode)
-	{
-		[self _populateNodeTree:newNode populatedNodeIdentifiers:identifiers error:&error];
-	}
-	
-	if (outError) *outError = error;
-	return newNode;
+    NSError* error = nil;
+    IMBNode* newNode = nil;
+    NSArray* identifiers = [self _identifiersOfPopulatedSubnodesOfNode:inNode];
+    
+    if (inNode.isTopLevelNode)
+    {
+        newNode = [self unpopulatedTopLevelNode:&error];
+    }
+    else
+    {
+        newNode = inNode;
+    }
+    
+    if (newNode)
+    {
+        [self _populateNodeTree:newNode populatedNodeIdentifiers:identifiers error:&error];
+    }
+    
+    if (outError) *outError = error;
+    return newNode;
 }
 
 
@@ -181,52 +181,52 @@
 
 - (NSArray*) _identifiersOfPopulatedSubnodesOfNode:(IMBNode*)inNode
 {
-	NSMutableArray* identifiers = [NSMutableArray array];
-	[self _identifiersOfPopulatedSubnodesOfNode:inNode identifiers:identifiers];
-	return (NSArray*)identifiers;
+    NSMutableArray* identifiers = [NSMutableArray array];
+    [self _identifiersOfPopulatedSubnodesOfNode:inNode identifiers:identifiers];
+    return (NSArray*)identifiers;
 }
 
 - (void) _identifiersOfPopulatedSubnodesOfNode:(IMBNode*)inNode identifiers:(NSMutableArray*)inIdentifiers
 {
-	if (inNode.isPopulated)
-	{
-		[inIdentifiers addObject:inNode.identifier];
-		
-		for (IMBNode* subnode in inNode.subnodes)
-		{
-			[self _identifiersOfPopulatedSubnodesOfNode:subnode identifiers:inIdentifiers];
-		}
-	}
+    if (inNode.isPopulated)
+    {
+        [inIdentifiers addObject:inNode.identifier];
+        
+        for (IMBNode* subnode in inNode.subnodes)
+        {
+            [self _identifiersOfPopulatedSubnodesOfNode:subnode identifiers:inIdentifiers];
+        }
+    }
 }
 
 
-// 
+//
 - (BOOL) _populateNodeTree:(IMBNode*)inNode populatedNodeIdentifiers:(NSArray*)inPopulatedNodeIdentifiers error:(NSError**)outError
 {
-	NSError* error = nil;
-
-	if ([inPopulatedNodeIdentifiers indexOfObject:inNode.identifier] != NSNotFound)
-	{
-		[inNode unpopulate];
-		[self populateNode:inNode error:&error];
-		
-		if (error == nil)
-		{
-			for (IMBNode* subnode in inNode.subnodes)
-			{
+    NSError* error = nil;
+    
+    if ([inPopulatedNodeIdentifiers indexOfObject:inNode.identifier] != NSNotFound)
+    {
+        [inNode unpopulate];
+        [self populateNode:inNode error:&error];
+        
+        if (error == nil)
+        {
+            for (IMBNode* subnode in inNode.subnodes)
+            {
                 // Take care of the potential fact that inNode's folder might contain a symbolic link to itself.
                 // (thus causing an infinite recursion crash if not taken care of)
                 NSMutableArray *identifiersOfNodesToBePopulated = [NSMutableArray arrayWithArray:inPopulatedNodeIdentifiers];
                 [identifiersOfNodesToBePopulated removeObject:inNode.identifier];
                 
-				[self _populateNodeTree:subnode populatedNodeIdentifiers:identifiersOfNodesToBePopulated error:&error];
-				if (error) break;
-			}
-		}
-	}
-	
-	if (outError) *outError = error;
-	return error == nil;
+                [self _populateNodeTree:subnode populatedNodeIdentifiers:identifiersOfNodesToBePopulated error:&error];
+                if (error) break;
+            }
+        }
+    }
+    
+    if (outError) *outError = error;
+    return error == nil;
 }
 
 
@@ -241,9 +241,9 @@
 
 - (id) thumbnailForObject:(IMBObject*)inObject error:(NSError**)outError
 {
-	[self imb_throwAbstractBaseClassExceptionForSelector:_cmd];
-	if (outError) *outError = nil;
-	return nil;
+    [self imb_throwAbstractBaseClassExceptionForSelector:_cmd];
+    if (outError) *outError = nil;
+    return nil;
 }
 
 
@@ -251,9 +251,9 @@
 
 - (NSDictionary*) metadataForObject:(IMBObject*)inObject error:(NSError**)outError
 {
-	[self imb_throwAbstractBaseClassExceptionForSelector:_cmd];
-	if (outError) *outError = nil;
-	return nil;
+    [self imb_throwAbstractBaseClassExceptionForSelector:_cmd];
+    if (outError) *outError = nil;
+    return nil;
 }
 
 
@@ -261,9 +261,9 @@
 
 - (NSData*) bookmarkForObject:(IMBObject*)inObject error:(NSError**)outError
 {
-	[self imb_throwAbstractBaseClassExceptionForSelector:_cmd];
-	if (outError) *outError = nil;
-	return nil;
+    [self imb_throwAbstractBaseClassExceptionForSelector:_cmd];
+    if (outError) *outError = nil;
+    return nil;
 }
 
 
@@ -300,11 +300,11 @@
 
 
 // This helper method can be used by subclasses to construct identifiers of form "classname://path/to/node"...
- 
+
 - (NSString*) identifierForPath:(NSString*)inPath
 {
-	NSString* prefix = [self iMedia2PersistentResourceIdentifierPrefix];
-	return [NSString stringWithFormat:@"%@:/%@",prefix,inPath];
+    NSString* prefix = [self iMedia2PersistentResourceIdentifierPrefix];
+    return [NSString stringWithFormat:@"%@:/%@",prefix,inPath];
 }
 
 
@@ -317,11 +317,11 @@
 
 - (NSString*) identifierForObject:(IMBObject*)inObject
 {
-	NSString* parserClassName = NSStringFromClass([self class]);
+    NSString* parserClassName = NSStringFromClass([self class]);
     NSUInteger libraryHash = [[[self mediaSource] path] hash];
-	NSString* path = [inObject.location path];
-	NSString* identifier = [NSString stringWithFormat:@"%@:%lu/%@",parserClassName,(unsigned long)libraryHash,path];
-	return identifier;
+    NSString* path = [inObject.location path];
+    NSString* identifier = [NSString stringWithFormat:@"%@:%lu/%@",parserClassName,(unsigned long)libraryHash,path];
+    return identifier;
 }
 
 
@@ -333,7 +333,7 @@
 
 - (NSString*) persistentResourceIdentifierForObject:(IMBObject*)inObject
 {
-	return [[inObject URL] absoluteString];
+    return [[inObject URL] absoluteString];
 }
 
 
@@ -345,10 +345,10 @@
 
 - (NSString*) iMedia2PersistentResourceIdentifierForObject:(IMBObject*)inObject
 {
-	NSString* prefix = [self iMedia2PersistentResourceIdentifierPrefix];
-	NSString* path = [inObject.location path];
-	NSString* identifier = [NSString stringWithFormat:@"%@/%@",prefix,path];
-	return identifier;
+    NSString* prefix = [self iMedia2PersistentResourceIdentifierPrefix];
+    NSString* path = [inObject.location path];
+    NSString* identifier = [NSString stringWithFormat:@"%@/%@",prefix,path];
+    return identifier;
 }
 
 
@@ -356,12 +356,12 @@
 // to the method iMedia2PersistentResourceIdentifierForObject: to see how it is used. Historically we used class names
 // as the prefix. However, during the evolution of iMedia class names can change and identifier string would thus
 // also change. Being non-persistent this is undesirable, as thing that depend of the immutability of identifier strings
-// would break. One such example is object badges, which use such identifiers. To gain backward compatibilty, a parser 
+// would break. One such example is object badges, which use such identifiers. To gain backward compatibilty, a parser
 // class can override this method to return a prefix that matches the historic class name used in iMedia2
 
 - (NSString*) iMedia2PersistentResourceIdentifierPrefix
 {
-	return NSStringFromClass([self class]);
+    return NSStringFromClass([self class]);
 }
 
 
@@ -381,90 +381,100 @@
     NSAssert(url != nil, @"Getting NSURLEffectiveIconKey suceeded, but with a nil image, which isn't documented");
     
     result = [result copy]; // since we're about to mutate
-	[result setSize:NSMakeSize(16,16)];
-	return [result autorelease];
+    [result setSize:NSMakeSize(16,16)];
+    return [result autorelease];
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 
 
-// Creates a thumbnail for local image files. Either location or imageLocation of inObject must contain a fileURL. 
-// If imageLocation is set then the corresponding image is returned. Otherwise a downscaled image based on location 
+// Creates a thumbnail for local image files. Either location or imageLocation of inObject must contain a fileURL.
+// If imageLocation is set then the corresponding image is returned. Otherwise a downscaled image based on location
 // is returned...
 
 - (CGImageRef) thumbnailFromLocalImageFileForObject:(IMBObject*)inObject error:(NSError**)outError
 {
-	NSError* error = nil;
-	NSURL* url = nil;
-	CGImageSourceRef source = NULL;
-	CGImageRef thumbnail = NULL;
-	BOOL shouldScaleDown = NO;
-	
-	// Choose the most appropriate file url and whether we should scale down to generate a thumbnail...
-	
-	if (error == nil)
-	{
-		if (inObject.imageLocation)
-		{
-			url = inObject.imageLocation;
-			shouldScaleDown = NO;
-		}
-		else
-		{
-			url = inObject.URL;
-			shouldScaleDown = YES;
-		}
-	}
-	
-	// Create an image source...
-	
-	if (error == nil)
-	{
-		source = CGImageSourceCreateWithURL((CFURLRef)url,NULL);
-		
-		if (source == nil)
-		{
-			NSString* description = [NSString stringWithFormat:@"Could not find image file at %@",url];
-			NSDictionary* info = [NSDictionary dictionaryWithObjectsAndKeys:description,NSLocalizedDescriptionKey,nil];
-			error = [NSError errorWithDomain:kIMBErrorDomain code:fnfErr userInfo:info];
-		}
-	}
-
-	// Render the thumbnail...
-	
-	if ((error == nil) && (source != nil))
-	{
-		if (shouldScaleDown)
-		{
+    NSError* error = nil;
+    NSURL* url = nil;
+    CGImageSourceRef source = NULL;
+    CGImageRef thumbnail = NULL;
+    BOOL shouldScaleDown = NO;
+    
+    // Choose the most appropriate file url and whether we should scale down to generate a thumbnail...
+    
+    if (error == nil)
+    {
+        if (inObject.imageLocation)
+        {
+            url = inObject.imageLocation;
+            shouldScaleDown = NO;
+        }
+        else
+        {
+            url = inObject.URL;
+            shouldScaleDown = YES;
+        }
+    }
+    
+    // Create an image source...
+    
+    if (error == nil)
+    {
+        source = CGImageSourceCreateWithURL((CFURLRef)url,NULL);
+        
+        if (source == nil)
+        {
+            NSString* description = [NSString stringWithFormat:@"Could not find image file at %@",url];
+            NSDictionary* info = [NSDictionary dictionaryWithObjectsAndKeys:description,NSLocalizedDescriptionKey,nil];
+            error = [NSError errorWithDomain:kIMBErrorDomain code:fnfErr userInfo:info];
+        }
+    }
+    
+    // Render the thumbnail...
+    
+    if ((error == nil) && (source != nil))
+    {
+        if (shouldScaleDown)
+        {
             NSDictionary* options = [NSDictionary dictionaryWithObjectsAndKeys:
-				(id)kCFBooleanTrue,kCGImageSourceCreateThumbnailFromImageIfAbsent,
-				(id)[NSNumber numberWithInteger:256],kCGImageSourceThumbnailMaxPixelSize,
-				(id)kCFBooleanTrue,kCGImageSourceCreateThumbnailWithTransform,
-				nil];
+                                     (id)kCFBooleanTrue,kCGImageSourceCreateThumbnailFromImageIfAbsent,
+                                     (id)[NSNumber numberWithInteger:256],kCGImageSourceThumbnailMaxPixelSize,
+                                     (id)kCFBooleanTrue,kCGImageSourceCreateThumbnailWithTransform,
+                                     nil];
             
             thumbnail = CGImageSourceCreateThumbnailAtIndex(source,0,(CFDictionaryRef)options);
-		}
-		else
-		{
+        }
+        else
+        {
             thumbnail = CGImageSourceCreateImageAtIndex(source,0,NULL);
-		}
-		
-		if (thumbnail == nil)
-		{
-			NSString* description = [NSString stringWithFormat:@"Could not create image from URL: %@",url];
-			NSDictionary* info = [NSDictionary dictionaryWithObjectsAndKeys:description,NSLocalizedDescriptionKey,nil];
-			error = [NSError errorWithDomain:kIMBErrorDomain code:0 userInfo:info];
-		}
-	}
-	
-	// Cleanup...
-	
-	if (source) CFRelease(source);
-
-	[NSMakeCollectable(thumbnail) autorelease];
-	if (outError) *outError = error;
-	return thumbnail;
+        }
+        
+        if (thumbnail == nil)
+        {
+            NSImage *img = [[[NSImage alloc] initWithContentsOfURL:url] autorelease];
+            if (img)
+            {
+                CGRect proposedRect = CGRectMake(0, 0, 256, 256);
+                thumbnail = [img CGImageForProposedRect:&proposedRect context:nil hints:nil];
+                CGImageRetain(thumbnail);
+            }
+        }
+        if (thumbnail == nil)
+        {
+            NSString* description = [NSString stringWithFormat:@"Could not create image from URL: %@",url];
+            NSDictionary* info = [NSDictionary dictionaryWithObjectsAndKeys:description,NSLocalizedDescriptionKey,nil];
+            error = [NSError errorWithDomain:kIMBErrorDomain code:0 userInfo:info];
+        }
+    }
+    
+    // Cleanup...
+    
+    if (source) CFRelease(source);
+    
+    [NSMakeCollectable(thumbnail) autorelease];
+    if (outError) *outError = error;
+    return thumbnail;
 }
 
 
@@ -475,51 +485,51 @@
 
 - (CGImageRef) thumbnailFromQuicklookForObject:(IMBObject*)inObject error:(NSError**)outError
 {
-	NSError* error = nil;
-	NSURL* url = inObject.URL;
-	CGImageRef thumbnail = [url imb_quicklookCGImage];
-	if (outError) *outError = error;
-	return thumbnail;
+    NSError* error = nil;
+    NSURL* url = inObject.URL;
+    CGImageRef thumbnail = [url imb_quicklookCGImage];
+    if (outError) *outError = error;
+    return thumbnail;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 
 
-// This is a generic implementation for creating a security scoped bookmark of local media files. It assumes  
+// This is a generic implementation for creating a security scoped bookmark of local media files. It assumes
 // that the url to the local file is stored in inObject.location. May be overridden by subclasses...
 
 - (NSData*) bookmarkForLocalFileObject:(IMBObject*)inObject error:(NSError**)outError
 {
-	NSError* error = nil;
-//	NSURL* baseURL = nil; //inObject.bookmarkBaseURL;
-	NSURL* fileURL = inObject.URL;
-	NSData* bookmark = nil;
-	
-	if ([fileURL isFileURL])
-	{
-	/*
-		NSURLBookmarkCreationOptions options = 
-			NSURLBookmarkCreationMinimalBookmark |
-//			NSURLBookmarkCreationWithSecurityScope |
-//			NSURLBookmarkCreationSecurityScopeAllowOnlyReadAccess |
-			NSURLBookmarkCreationPreferFileIDResolution;
-	*/		
-		bookmark = [fileURL 
-			bookmarkDataWithOptions:0 //options
-			includingResourceValuesForKeys:nil
-			relativeToURL:nil
-			error:&error];
-	}
-	else
-	{
+    NSError* error = nil;
+    //    NSURL* baseURL = nil; //inObject.bookmarkBaseURL;
+    NSURL* fileURL = inObject.URL;
+    NSData* bookmark = nil;
+    
+    if ([fileURL isFileURL])
+    {
+        /*
+         NSURLBookmarkCreationOptions options =
+         NSURLBookmarkCreationMinimalBookmark |
+         //            NSURLBookmarkCreationWithSecurityScope |
+         //            NSURLBookmarkCreationSecurityScopeAllowOnlyReadAccess |
+         NSURLBookmarkCreationPreferFileIDResolution;
+         */
+        bookmark = [fileURL
+                    bookmarkDataWithOptions:0 //options
+                    includingResourceValuesForKeys:nil
+                    relativeToURL:nil
+                    error:&error];
+    }
+    else
+    {
         NSString* description = [NSString stringWithFormat:@"Could not create bookmark for non file URL: %@",fileURL];
         NSDictionary* info = [NSDictionary dictionaryWithObjectsAndKeys:description,NSLocalizedDescriptionKey,nil];
         error = [NSError errorWithDomain:kIMBErrorDomain code:paramErr userInfo:info];
-	}
-	
-	if (outError) *outError = error;
-	return bookmark;
+    }
+    
+    if (outError) *outError = error;
+    return bookmark;
 }
 
 
@@ -536,5 +546,6 @@
 
 
 @end
+
 
 
