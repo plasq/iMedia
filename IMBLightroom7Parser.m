@@ -127,14 +127,10 @@
 		if (databaseVersionLong < 700003) {
 			return NO;
 		}
-		
-		// PB 10.01.2020: Removed upper version check for now, to obtain quick fix compatibilty with CC9.
-		// May need to be reverted in the future when the database becomes incompatible!
-		
-//		else if (databaseVersionLong >= 800000) {
-//			return NO;
-//		}
-		
+		else if (databaseVersionLong >= 800000) {
+			return NO;
+		}
+        
         return YES;
 	}
 
