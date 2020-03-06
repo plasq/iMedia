@@ -435,46 +435,51 @@
     
     if ((error == nil) && (source != nil))
     {
-        if (shouldScaleDown)
-        {
-            NSDictionary* options = [NSDictionary dictionaryWithObjectsAndKeys:
-                                     (id)kCFBooleanTrue,kCGImageSourceCreateThumbnailFromImageIfAbsent,
-                                     (id)[NSNumber numberWithInteger:256],kCGImageSourceThumbnailMaxPixelSize,
-                                     (id)kCFBooleanTrue,kCGImageSourceCreateThumbnailWithTransform,
-                                     nil];
-            
-            thumbnail = CGImageSourceCreateThumbnailAtIndex(source,0,(CFDictionaryRef)options);
-        }
-        else
-        {
-            thumbnail = CGImageSourceCreateImageAtIndex(source,0,NULL);
-        }
+        CGImageSourceStatus status = CGImageSourceGetStatus(source);
         
-        if (thumbnail == nil)
-        {
-            NSImage *img = [[[NSImage alloc] initWithContentsOfURL:url] autorelease];
-            if (img)
+        if ((status == kCGImageStatusComplete) && (CGImageSourceGetCount(source)))
+            
+            if (shouldScaleDown)
             {
-                CGRect proposedRect = CGRectMake(0, 0, 256, 256);
-                thumbnail = [img CGImageForProposedRect:&proposedRect context:nil hints:nil];
-                CGImageRetain(thumbnail);
+                NSDictionary* options = [NSDictionary dictionaryWithObjectsAndKeys:
+                                         (id)kCFBooleanTrue,kCGImageSourceCreateThumbnailFromImageIfAbsent,
+                                         (id)[NSNumber numberWithInteger:256],kCGImageSourceThumbnailMaxPixelSize,
+                                         (id)kCFBooleanTrue,kCGImageSourceCreateThumbnailWithTransform,
+                                         nil];
+                
+                thumbnail = CGImageSourceCreateThumbnailAtIndex(source,0,(CFDictionaryRef)options);
             }
-        }
-        if (thumbnail == nil)
+            else
+            {
+                thumbnail = CGImageSourceCreateImageAtIndex(source,0,NULL);
+            }
+        
+    }
+    if (thumbnail == nil)
+    {
+        NSImage *img = [[[NSImage alloc] initWithContentsOfURL:url] autorelease];
+        if (img)
         {
-            NSString* description = [NSString stringWithFormat:@"Could not create image from URL: %@",url];
-            NSDictionary* info = [NSDictionary dictionaryWithObjectsAndKeys:description,NSLocalizedDescriptionKey,nil];
-            error = [NSError errorWithDomain:kIMBErrorDomain code:0 userInfo:info];
+            CGRect proposedRect = CGRectMake(0, 0, 256, 256);
+            thumbnail = [img CGImageForProposedRect:&proposedRect context:nil hints:nil];
+            CGImageRetain(thumbnail);
         }
     }
-    
-    // Cleanup...
-    
-    if (source) CFRelease(source);
-    
-    [NSMakeCollectable(thumbnail) autorelease];
-    if (outError) *outError = error;
-    return thumbnail;
+    if (thumbnail == nil)
+    {
+        NSString* description = [NSString stringWithFormat:@"Could not create image from URL: %@",url];
+        NSDictionary* info = [NSDictionary dictionaryWithObjectsAndKeys:description,NSLocalizedDescriptionKey,nil];
+        error = [NSError errorWithDomain:kIMBErrorDomain code:0 userInfo:info];
+    }
+}
+
+// Cleanup...
+
+if (source) CFRelease(source);
+
+[NSMakeCollectable(thumbnail) autorelease];
+if (outError) *outError = error;
+return thumbnail;
 }
 
 
@@ -546,6 +551,8 @@
 
 
 @end
+
+
 
 
 
