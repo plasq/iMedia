@@ -145,7 +145,6 @@
 #pragma mark
 
 // Designated initializer
-
 - (id) initWithParser:(IMBParser*)inParser topLevel:(BOOL)inTopLevel
 {
 	if (self = [super init])
@@ -354,6 +353,17 @@
 		@try
 		{
 			self.icon = [inCoder decodeObjectForKey:@"icon"];
+            if (self.icon == nil) {
+                if (self.mediaSource != nil) {
+                    NSImage *result;
+                    if ([self.mediaSource getResourceValue:&result forKey:NSURLEffectiveIconKey error:NULL]) {
+                        result = [result copy]; // since we're about to mutate
+                        [result setSize:NSMakeSize(16,16)];
+                        self.icon = result;
+                        [result release];
+                    }
+                }
+            }
 		}
 		@catch (NSException *exception)
 		{
@@ -417,17 +427,17 @@
     {
         if (inImage)
         {
-            NSImage* strippedIcon = [[[NSImage alloc] initWithSize:NSMakeSize(16.0,16.0)]autorelease];
+            NSImage* strippedIcon = [[[NSImage alloc] initWithSize:NSMakeSize(16.0,16.0)] autorelease];
             for (NSImageRep* iconRep in inImage.representations)
             {
                 NSSize size = iconRep.size;
                 
                 if (size.width <= 32.0)
                 {
-                    //			if ([rep isKindOfClass:[NSBitmapImageRep class]])
+                    //            if ([rep isKindOfClass:[NSBitmapImageRep class]])
                     if (YES)
                     {
-                        //				NSLog(@"%s %@ %@",__FUNCTION__,NSStringFromClass([rep class]),NSStringFromSize(size));
+                        //                NSLog(@"%s %@ %@",__FUNCTION__,NSStringFromClass([rep class]),NSStringFromSize(size));
                         [strippedIcon addRepresentation:iconRep];
                     }
                     else
@@ -441,7 +451,9 @@
         return nil;
     };
 
-    [inCoder encodeObject:iconWithSmallRepresentations(self.icon) forKey:@"icon"];
+    if (self.mediaSource == nil) {
+        [inCoder encodeObject:iconWithSmallRepresentations(self.icon) forKey:@"icon"];
+    }
     [inCoder encodeObject:iconWithSmallRepresentations(self.highlightIcon) forKey:@"highlightIcon"];
 }
 

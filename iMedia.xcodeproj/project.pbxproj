@@ -795,8 +795,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 16;
 			files = (
-				4947C28A22F071C900D65CA3 /* ObjectiveFlickr.framework in CopyFiles */,
 				4947C28B22F071C900D65CA3 /* XPCKit.framework in CopyFiles */,
+				4947C28A22F071C900D65CA3 /* ObjectiveFlickr.framework in CopyFiles */,
 				4947C28C22F071C900D65CA3 /* PhFacebook.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
