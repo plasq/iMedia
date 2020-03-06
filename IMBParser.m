@@ -438,6 +438,7 @@
         CGImageSourceStatus status = CGImageSourceGetStatus(source);
         
         if ((status == kCGImageStatusComplete) && (CGImageSourceGetCount(source)))
+        {
             
             if (shouldScaleDown)
             {
@@ -453,33 +454,33 @@
             {
                 thumbnail = CGImageSourceCreateImageAtIndex(source,0,NULL);
             }
-        
-    }
-    if (thumbnail == nil)
-    {
-        NSImage *img = [[[NSImage alloc] initWithContentsOfURL:url] autorelease];
-        if (img)
+            
+        }
+        if (thumbnail == nil)
         {
-            CGRect proposedRect = CGRectMake(0, 0, 256, 256);
-            thumbnail = [img CGImageForProposedRect:&proposedRect context:nil hints:nil];
-            CGImageRetain(thumbnail);
+            NSImage *img = [[[NSImage alloc] initWithContentsOfURL:url] autorelease];
+            if (img)
+            {
+                CGRect proposedRect = CGRectMake(0, 0, 256, 256);
+                thumbnail = [img CGImageForProposedRect:&proposedRect context:nil hints:nil];
+                CGImageRetain(thumbnail);
+            }
+        }
+        if (thumbnail == nil)
+        {
+            NSString* description = [NSString stringWithFormat:@"Could not create image from URL: %@",url];
+            NSDictionary* info = [NSDictionary dictionaryWithObjectsAndKeys:description,NSLocalizedDescriptionKey,nil];
+            error = [NSError errorWithDomain:kIMBErrorDomain code:0 userInfo:info];
         }
     }
-    if (thumbnail == nil)
-    {
-        NSString* description = [NSString stringWithFormat:@"Could not create image from URL: %@",url];
-        NSDictionary* info = [NSDictionary dictionaryWithObjectsAndKeys:description,NSLocalizedDescriptionKey,nil];
-        error = [NSError errorWithDomain:kIMBErrorDomain code:0 userInfo:info];
-    }
-}
 
-// Cleanup...
-
-if (source) CFRelease(source);
-
-[NSMakeCollectable(thumbnail) autorelease];
-if (outError) *outError = error;
-return thumbnail;
+    // Cleanup...
+    
+    if (source) CFRelease(source);
+    
+    [NSMakeCollectable(thumbnail) autorelease];
+    if (outError) *outError = error;
+    return thumbnail;
 }
 
 
